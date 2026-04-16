@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+import { getAuth, GoogleAuthProvider, getRedirectResult, signInWithPopup, signInWithRedirect } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
 
 const firebaseConfig = {
     apiKey: 'AIzaSyBcPlbcP1eleUdVRNBJL_-KfLBcwsgkbnA',
@@ -14,6 +14,10 @@ const firebaseConfig = {
 const firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
+
+function esDispositivoMovil() {
+    return window.matchMedia('(max-width: 768px)').matches || /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
+}
 
 async function guardarSesionGoogle(user) {
     const nombreCompleto = user.displayName || user.email || 'Usuario';
@@ -40,10 +44,26 @@ async function guardarSesionGoogle(user) {
 
 async function iniciarConGoogle() {
     try {
+        if (esDispositivoMovil()) {
+            await signInWithRedirect(auth, googleProvider);
+            return;
+        }
+
         const result = await signInWithPopup(auth, googleProvider);
         await guardarSesionGoogle(result.user);
     } catch (error) {
         alert('No se pudo iniciar con Google: ' + error.message);
+    }
+}
+
+async function procesarRedireccionGoogle() {
+    try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+            await guardarSesionGoogle(result.user);
+        }
+    } catch (error) {
+        alert('No se pudo completar el inicio con Google: ' + error.message);
     }
 }
 
@@ -116,3 +136,5 @@ const btnGoogleRegister = document.getElementById('btn-google-register');
 if (btnGoogleRegister) {
     btnGoogleRegister.addEventListener('click', iniciarConGoogle);
 }
+
+procesarRedireccionGoogle();
