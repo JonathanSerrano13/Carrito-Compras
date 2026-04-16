@@ -4,6 +4,9 @@ const path = require('path');
 const fs = require('fs');
 const admin = require('firebase-admin');
 
+let db = null;
+let firebaseInitError = null;
+
 // Inicializar Firebase Admin (Vercel: variables de entorno, Local: firebase-key.json)
 function obtenerCredencialesFirebase() {
     const projectId = process.env.FIREBASE_PROJECT_ID;
@@ -26,18 +29,38 @@ function obtenerCredencialesFirebase() {
     throw new Error('Faltan credenciales de Firebase. Configura FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL y FIREBASE_PRIVATE_KEY o agrega firebase-key.json localmente.');
 }
 
-if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert(obtenerCredencialesFirebase()),
-        databaseURL: process.env.FIREBASE_DATABASE_URL || "https://carrito-compras-2f7d7.firebaseio.com"
-    });
+try {
+    if (!admin.apps.length) {
+        admin.initializeApp({
+            credential: admin.credential.cert(obtenerCredencialesFirebase()),
+            databaseURL: process.env.FIREBASE_DATABASE_URL || "https://carrito-compras-2f7d7.firebaseio.com"
+        });
+    }
+    db = admin.firestore();
+} catch (error) {
+    firebaseInitError = error;
+    console.error('Error inicializando Firebase:', error.message);
 }
-
-const db = admin.firestore();
 
 // Middleware
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
+
+// Si Firebase falla en Vercel, no tumbar todo el sitio: responder claro en /api.
+app.use('/api', (req, res, next) => {
+    if (!db) {
+        return res.status(500).json({
+            error: 'Firebase no configurado correctamente en el entorno.',
+            detalle: firebaseInitError ? firebaseInitError.message : 'Sin detalles',
+            faltantes: [
+                'FIREBASE_PROJECT_ID',
+                'FIREBASE_CLIENT_EMAIL',
+                'FIREBASE_PRIVATE_KEY'
+            ]
+        });
+    }
+    next();
+});
 
 // Rutas
 app.get('/', (req, res) => {
