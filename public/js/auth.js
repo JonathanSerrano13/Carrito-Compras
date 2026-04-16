@@ -15,6 +15,7 @@ const firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
 let procesandoSesionGoogle = false;
+const CLAVE_LOGIN_GOOGLE_EN_CURSO = 'login_google_en_curso';
 
 function esDispositivoMovil() {
     return window.matchMedia('(max-width: 768px)').matches || /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
@@ -46,6 +47,7 @@ async function guardarSesionGoogle(user) {
         }
 
         localStorage.setItem('sesion_activa', JSON.stringify(data.usuario));
+        sessionStorage.removeItem(CLAVE_LOGIN_GOOGLE_EN_CURSO);
         window.location.href = '/index.html';
     } finally {
         procesandoSesionGoogle = false;
@@ -54,6 +56,8 @@ async function guardarSesionGoogle(user) {
 
 async function iniciarConGoogle() {
     try {
+        sessionStorage.setItem(CLAVE_LOGIN_GOOGLE_EN_CURSO, '1');
+
         if (esDispositivoMovil()) {
             await signInWithRedirect(auth, googleProvider);
             return;
@@ -62,6 +66,7 @@ async function iniciarConGoogle() {
         const result = await signInWithPopup(auth, googleProvider);
         await guardarSesionGoogle(result.user);
     } catch (error) {
+        sessionStorage.removeItem(CLAVE_LOGIN_GOOGLE_EN_CURSO);
         alert('No se pudo iniciar con Google: ' + error.message);
     }
 }
@@ -78,7 +83,9 @@ async function procesarRedireccionGoogle() {
 }
 
 onAuthStateChanged(auth, (user) => {
-    if (user && !localStorage.getItem('sesion_activa')) {
+    const loginGoogleEnCurso = sessionStorage.getItem(CLAVE_LOGIN_GOOGLE_EN_CURSO) === '1';
+
+    if (user && loginGoogleEnCurso && !localStorage.getItem('sesion_activa')) {
         guardarSesionGoogle(user).catch((error) => {
             alert('No se pudo completar el inicio con Google: ' + error.message);
         });
