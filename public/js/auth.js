@@ -56,7 +56,7 @@ async function guardarSesionGoogle(user) {
 
 async function iniciarConGoogle() {
     try {
-        sessionStorage.setItem(CLAVE_LOGIN_GOOGLE_EN_CURSO, '1');
+        localStorage.setItem(CLAVE_LOGIN_GOOGLE_EN_CURSO, '1');
 
         if (esDispositivoMovil()) {
             await signInWithRedirect(auth, googleProvider);
@@ -66,7 +66,7 @@ async function iniciarConGoogle() {
         const result = await signInWithPopup(auth, googleProvider);
         await guardarSesionGoogle(result.user);
     } catch (error) {
-        sessionStorage.removeItem(CLAVE_LOGIN_GOOGLE_EN_CURSO);
+        localStorage.removeItem(CLAVE_LOGIN_GOOGLE_EN_CURSO);
         alert('No se pudo iniciar con Google: ' + error.message);
     }
 }
@@ -76,6 +76,12 @@ async function procesarRedireccionGoogle() {
         const result = await getRedirectResult(auth);
         if (result?.user) {
             await guardarSesionGoogle(result.user);
+            return;
+        }
+
+        const loginGoogleEnCurso = localStorage.getItem(CLAVE_LOGIN_GOOGLE_EN_CURSO) === '1';
+        if (loginGoogleEnCurso && auth.currentUser) {
+            await guardarSesionGoogle(auth.currentUser);
         }
     } catch (error) {
         alert('No se pudo completar el inicio con Google: ' + error.message);
@@ -83,10 +89,18 @@ async function procesarRedireccionGoogle() {
 }
 
 onAuthStateChanged(auth, (user) => {
-    const loginGoogleEnCurso = sessionStorage.getItem(CLAVE_LOGIN_GOOGLE_EN_CURSO) === '1';
+    const loginGoogleEnCurso = localStorage.getItem(CLAVE_LOGIN_GOOGLE_EN_CURSO) === '1';
 
     if (user && loginGoogleEnCurso && !localStorage.getItem('sesion_activa')) {
         guardarSesionGoogle(user).catch((error) => {
+            alert('No se pudo completar el inicio con Google: ' + error.message);
+        });
+    }
+});
+
+window.addEventListener('pageshow', () => {
+    if (localStorage.getItem(CLAVE_LOGIN_GOOGLE_EN_CURSO) === '1' && auth.currentUser && !localStorage.getItem('sesion_activa')) {
+        guardarSesionGoogle(auth.currentUser).catch((error) => {
             alert('No se pudo completar el inicio con Google: ' + error.message);
         });
     }
