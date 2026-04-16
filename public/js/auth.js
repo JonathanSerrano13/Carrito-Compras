@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
-import { getAuth, GoogleAuthProvider, getRedirectResult, signInWithPopup, signInWithRedirect } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+import { getAuth, GoogleAuthProvider, getRedirectResult, onAuthStateChanged, signInWithPopup, signInWithRedirect } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
 
 const firebaseConfig = {
     apiKey: 'AIzaSyBcPlbcP1eleUdVRNBJL_-KfLBcwsgkbnA',
@@ -14,32 +14,42 @@ const firebaseConfig = {
 const firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
+let procesandoSesionGoogle = false;
 
 function esDispositivoMovil() {
     return window.matchMedia('(max-width: 768px)').matches || /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
 }
 
 async function guardarSesionGoogle(user) {
-    const nombreCompleto = user.displayName || user.email || 'Usuario';
-
-    const response = await fetch('/api/google-auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            nombreCompleto,
-            correo: user.email,
-            fotoURL: user.photoURL || ''
-        })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.error || 'No se pudo guardar la sesión de Google');
+    if (procesandoSesionGoogle) {
+        return;
     }
 
-    localStorage.setItem('sesion_activa', JSON.stringify(data.usuario));
-    window.location.href = '/index.html';
+    procesandoSesionGoogle = true;
+    const nombreCompleto = user.displayName || user.email || 'Usuario';
+
+    try {
+        const response = await fetch('/api/google-auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                nombreCompleto,
+                correo: user.email,
+                fotoURL: user.photoURL || ''
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'No se pudo guardar la sesión de Google');
+        }
+
+        localStorage.setItem('sesion_activa', JSON.stringify(data.usuario));
+        window.location.href = '/index.html';
+    } finally {
+        procesandoSesionGoogle = false;
+    }
 }
 
 async function iniciarConGoogle() {
@@ -66,6 +76,14 @@ async function procesarRedireccionGoogle() {
         alert('No se pudo completar el inicio con Google: ' + error.message);
     }
 }
+
+onAuthStateChanged(auth, (user) => {
+    if (user && !localStorage.getItem('sesion_activa')) {
+        guardarSesionGoogle(user).catch((error) => {
+            alert('No se pudo completar el inicio con Google: ' + error.message);
+        });
+    }
+});
 
 // Registro
 const fReg = document.getElementById('form-registro');
