@@ -9,9 +9,18 @@ let firebaseInitError = null;
 
 // Inicializar Firebase Admin (Vercel: variables de entorno, Local: firebase-key.json)
 function obtenerCredencialesFirebase() {
+    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
     const projectId = process.env.FIREBASE_PROJECT_ID;
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
     const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+
+    if (serviceAccountJson) {
+        try {
+            return JSON.parse(serviceAccountJson);
+        } catch (error) {
+            throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON no es un JSON valido.');
+        }
+    }
 
     if (projectId && clientEmail && privateKey) {
         return {
@@ -37,6 +46,7 @@ try {
         });
     }
     db = admin.firestore();
+    db.settings({ preferRest: true });
 } catch (error) {
     firebaseInitError = error;
     console.error('Error inicializando Firebase:', error.message);
