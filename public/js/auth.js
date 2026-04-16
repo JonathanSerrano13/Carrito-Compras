@@ -16,6 +16,7 @@ const auth = getAuth(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
 let procesandoSesionGoogle = false;
 const CLAVE_LOGIN_GOOGLE_EN_CURSO = 'login_google_en_curso';
+let resolviendoLoginGoogle = false;
 
 function esDispositivoMovil() {
     return window.matchMedia('(max-width: 768px)').matches || /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
@@ -88,6 +89,39 @@ async function procesarRedireccionGoogle() {
     }
 }
 
+async function esperarUsuarioAutenticado(maxIntentos = 15, intervaloMs = 300) {
+    for (let intento = 0; intento < maxIntentos; intento += 1) {
+        if (auth.currentUser) {
+            return auth.currentUser;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, intervaloMs));
+    }
+
+    return null;
+}
+
+async function resolverLoginGooglePendiente() {
+    if (resolviendoLoginGoogle) {
+        return;
+    }
+
+    if (localStorage.getItem(CLAVE_LOGIN_GOOGLE_EN_CURSO) !== '1' || localStorage.getItem('sesion_activa')) {
+        return;
+    }
+
+    resolviendoLoginGoogle = true;
+
+    try {
+        const usuario = await esperarUsuarioAutenticado();
+        if (usuario) {
+            await guardarSesionGoogle(usuario);
+        }
+    } finally {
+        resolviendoLoginGoogle = false;
+    }
+}
+
 onAuthStateChanged(auth, (user) => {
     const loginGoogleEnCurso = localStorage.getItem(CLAVE_LOGIN_GOOGLE_EN_CURSO) === '1';
 
@@ -99,11 +133,9 @@ onAuthStateChanged(auth, (user) => {
 });
 
 window.addEventListener('pageshow', () => {
-    if (localStorage.getItem(CLAVE_LOGIN_GOOGLE_EN_CURSO) === '1' && auth.currentUser && !localStorage.getItem('sesion_activa')) {
-        guardarSesionGoogle(auth.currentUser).catch((error) => {
-            alert('No se pudo completar el inicio con Google: ' + error.message);
-        });
-    }
+    resolverLoginGooglePendiente().catch((error) => {
+        alert('No se pudo completar el inicio con Google: ' + error.message);
+    });
 });
 
 // Registro
@@ -177,3 +209,4 @@ if (btnGoogleRegister) {
 }
 
 procesarRedireccionGoogle();
+resolverLoginGooglePendiente();
