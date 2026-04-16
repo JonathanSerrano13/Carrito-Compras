@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Pago - Sweet Market</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <h1 class="logo" onclick="window.location.href='/index.html'">Sweet Market</h1>
+            <div class="search-bar"> <input type="text" placeholder="Buscar productos...">
+                <button type="button">Buscar</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="sub-header">
+        <div class="sub-header-container">
+            <nav id="menu-usuario" class="user-menu"></nav>
+        </div>
+    </div>
+
+    <div class="checkout-layout">
+        <div class="payment-form">
+            <h3>Datos de Pago</h3>
+            <input type="text" id="tarjeta-num" placeholder="0000 0000 0000 0000">
+        </div>
+
+        <aside class="summary-card">
+            <h3>Resumen</h3>
+            <div class="line">
+                <span>Productos:</span>
+                <span id="resumen-subtotal">$0.00</span>
+            </div>
+            <div class="line total">
+                <span>Total a pagar:</span>
+                <strong id="resumen-total">$0.00</strong>
+            </div>
+            <button id="btn-finalizar" onclick="procesarPago()">Confirmar Transacción</button>
+        </aside>
+    </div>
+
+    <script src="../js/sesion.js"></script>
+    <script src="../js/pago.js"></script>
+</body>
+
+</html>

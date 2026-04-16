@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Carrito</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <h1 class="logo" onclick="window.location.href='/index.html'">Sweet Market</h1>
+            <div class="search-bar"> <input type="text" placeholder="Buscar productos...">
+                <button type="button">Buscar</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="sub-header">
+        <div class="sub-header-container">
+            <nav id="menu-usuario" class="user-menu"></nav>
+        </div>
+    </div>
+    <div class="container">
+        <section class="cart-wrapper">
+            <h2 class="cart-title">Tu Carrito</h2>
+
+            <div class="cart-table-wrap">
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Subtotal</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-carrito"></tbody>
+                </table>
+            </div>
+
+            <div class="cart-summary">
+                <h3>Total: $<span id="total-compra">0.00</span></h3>
+                <button class="cart-pay-btn" onclick="return false;">Pagar ahora</button>
+            </div>
+        </section>
+    </div>
+    <script src="../js/sesion.js"></script>
+    <script src="../js/carrito.js"></script>
+</body>
+
+</html>

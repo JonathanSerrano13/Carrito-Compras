@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Producto - Sweet Market</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <h1 class="logo" onclick="window.location.href='/index.html'">Sweet Market</h1>
+            <div class="search-bar"> <input type="text" placeholder="Buscar productos...">
+                <button type="button">Buscar</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="sub-header">
+        <div class="sub-header-container">
+            <nav id="menu-usuario" class="user-menu"></nav>
+        </div>
+    </div>
+
+    <div class="product-container">
+        <div class="product-gallery">
+            <div class="main-image">
+                <img id="p-img-principal" src="" alt="Cargando...">
+            </div>
+        </div>
+
+        <div class="product-main-info">
+            <h2 id="p-titulo-dinamico"></h2>
+
+            <div class="product-description">
+                <div class="price-tag">
+                    <span id="p-precio-dinamico"></span>
+                </div>
+
+                <h3>Descripción</h3>
+                <p id="p-descripcion-completa"></p>
+            </div>
+
+            <div class="info-vendedor-debajo">
+                <p>Vendido por: <strong id="p-nombre-vendedor"></strong></p>
+            </div>
+        </div>
+
+        <aside class="purchase-box">
+
+            <div class="selector-cantidad">
+                <label>Cantidad:</label>
+                <div class="cantidad-fila">
+                    <div class="control-stock">
+                        <button type="button" onclick="cambiarCantidad(-1)">-</button>
+                        <input type="number" id="p-cantidad-seleccionada" value="1" min="1" readonly>
+                        <button type="button" onclick="cambiarCantidad(1)">+</button>
+                    </div>
+                    <small id="stock-disponible-texto"></small>
+                </div>
+            </div>
+
+            <div class="cta-buttons">
+                <button class="btn-buy" onclick="comprarDirecto()">Comprar ahora</button>
+                <button class="btn-cart" onclick="agregarAlCarrito()">Agregar al carrito</button>
+            </div>
+        </aside>
+    </div>
+
+    <script src="../js/sesion.js"></script>
+    <script src="../js/producto.js"></script>
+</body>
+
+</html>

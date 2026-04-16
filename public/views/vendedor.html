@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vender Producto</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <h1 class="logo" onclick="window.location.href='/index.html'">Sweet Market</h1>
+            <div class="search-bar"> <input type="text" placeholder="Buscar productos...">
+                <button type="button">Buscar</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="sub-header">
+        <div class="sub-header-container">
+            <nav id="menu-usuario" class="user-menu"></nav>
+        </div>
+    </div>
+
+    <div class="container vendedor-page">
+        <form id="form-publicar" class="vendedor-form">
+            <h2 class="form-title">Publicar nuevo artículo</h2>
+            <input type="text" id="v-titulo" placeholder="Nombre del producto" required>
+            <div class="v-row">
+                <input type="number" id="v-precio" placeholder="Precio ($)" required>
+                <input type="number" id="v-stock" placeholder="Cantidad disponible" min="0" step="1" required>
+            </div>
+
+            <label for="v-imagen" class="file-label">Imagen del producto</label>
+            <input type="file" id="v-imagen" accept="image/*">
+            <img id="v-preview-imagen" class="img-preview" alt="Vista previa de imagen" hidden>
+
+            <textarea id="v-descripcion" placeholder="Detalles, estado del producto, etc."></textarea>
+
+            <button type="submit">Subir Producto</button>
+            <a href="publicaciones.html" class="vendedor-manage-link">Administrar mis publicaciones</a>
+        </form>
+    </div>
+
+    <script src="../js/sesion.js"></script>
+    <script src="../js/inventario.js"></script>
+</body>
+
+</html>

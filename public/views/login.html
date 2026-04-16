@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sweet Market</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <h1 class="logo" onclick="window.location.href='/index.html'">Sweet Market</h1>
+            <div class="header-spacer" aria-hidden="true"></div>
+        </div>
+    </header>
+    <div class="container" style="max-width: 400px;">
+        <form id="form-login">
+            <h2 class="form-title">Iniciar Sesión</h2>
+            <input type="email" id="l-cor" placeholder="Correo" required>
+            <input type="password" id="l-pas" placeholder="Contraseña" required>
+            <button type="submit">Entrar</button>
+
+            <button type="button" id="btn-google-login" class="google-auth-btn">
+                Iniciar con Google
+            </button>
+
+            <div class="form-separator"></div>
+            <p class="auth-switch">¿No tienes cuenta? <a href="register.html">Regístrate</a></p>
+        </form>
+    </div>
+    <script type="module" src="../js/auth.js"></script>
+</body>
+
+</html>
