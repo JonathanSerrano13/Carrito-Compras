@@ -619,7 +619,7 @@ app.post('/api/pagos/crear-preferencia', async (req, res) => {
             return res.status(400).json({ error: 'El carrito esta vacio' });
         }
 
-        const currencyId = process.env.MP_CURRENCY_ID || 'COP';
+        const currencyId = String(process.env.MP_CURRENCY_ID || 'COP').trim().toUpperCase();
         const baseUrl = obtenerBaseUrl(req);
 
         if (!esBaseUrlValidaParaCheckoutPro(baseUrl)) {
@@ -670,7 +670,14 @@ app.post('/api/pagos/crear-preferencia', async (req, res) => {
             sandboxInitPoint: preferenceResponse.sandbox_init_point
         });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        const mensaje = String(error?.message || 'Error al crear preferencia en Mercado Pago');
+        if (mensaje.toLowerCase().includes('currency_id invalid')) {
+            return res.status(400).json({
+                error: `Moneda invalida para tu cuenta de Mercado Pago. Revisa MP_CURRENCY_ID (actual: ${String(process.env.MP_CURRENCY_ID || 'COP').trim() || 'COP'}).`
+            });
+        }
+
+        res.status(500).json({ error: mensaje });
     }
 });
 
