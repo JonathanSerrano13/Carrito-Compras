@@ -33,7 +33,7 @@ async function eliminarPublicacion(idProducto) {
 }
 
 function editarProducto(idProducto) {
-    window.location.href = `/views/editar-producto.html?id=${idProducto}`;
+    window.location.href = `/views/productos/editar-producto.html?id=${idProducto}`;
 }
 
 async function renderizarMisPublicaciones() {

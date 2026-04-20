@@ -101,7 +101,7 @@ if (fReg) {
 
             if (response.ok) {
                 alert('Registrado ✅. Ahora inicia sesión.');
-                window.location.href = '/views/login.html';
+                window.location.href = '/views/auth/login.html';
             } else {
                 alert('Error: ' + data.error);
             }

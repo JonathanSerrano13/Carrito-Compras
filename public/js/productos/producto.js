@@ -130,7 +130,7 @@ async function agregarAlCarrito() {
     
     if (!sesionActiva) {
         alert("Debes iniciar sesión para agregar productos al carrito");
-        window.location.href = '/views/login.html';
+        window.location.href = '/views/auth/login.html';
         return;
     }
 

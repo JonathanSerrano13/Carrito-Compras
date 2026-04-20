@@ -138,7 +138,7 @@ function irAPago() {
     const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
     if (!sesionActiva?.correo) {
         alert('Debes iniciar sesión para continuar con el pago');
-        window.location.href = '/views/login.html';
+        window.location.href = '/views/auth/login.html';
         return;
     }
 
@@ -147,5 +147,5 @@ function irAPago() {
         return;
     }
 
-    window.location.href = '/views/pago.html';
+    window.location.href = '/views/pagos/pago.html';
 }
