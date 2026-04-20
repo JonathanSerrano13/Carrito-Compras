@@ -33,6 +33,40 @@ function esBaseUrlValidaParaCheckoutPro(baseUrl) {
     }
 }
 
+async function descontarStockProductos(productos) {
+    if (!Array.isArray(productos) || productos.length === 0) {
+        return;
+    }
+
+    await db.runTransaction(async (transaction) => {
+        const productosRefs = productos.map((item) => ({
+            ref: db.collection('productos').doc(String(item.id || '')),
+            cantidad: Number(item.cantidad) || 0,
+            nombre: item.nombre || 'Producto'
+        }));
+
+        for (const producto of productosRefs) {
+            if (!producto.ref.id || producto.cantidad <= 0) {
+                throw new Error('Producto o cantidad invalida al descontar stock');
+            }
+
+            const productoSnap = await transaction.get(producto.ref);
+            if (!productoSnap.exists) {
+                throw new Error(`El producto ${producto.nombre} ya no existe`);
+            }
+
+            const stockActual = Number(productoSnap.data()?.stock) || 0;
+            if (stockActual < producto.cantidad) {
+                throw new Error(`Stock insuficiente para ${producto.nombre}`);
+            }
+
+            transaction.update(producto.ref, {
+                stock: stockActual - producto.cantidad
+            });
+        }
+    });
+}
+
 async function registrarCompraDesdePago(paymentData) {
     const paymentId = String(paymentData.id || '');
     if (!paymentId) return;
@@ -88,6 +122,13 @@ async function registrarCompraDesdePago(paymentData) {
         return;
     }
 
+    let ajusteStockError = '';
+    try {
+        await descontarStockProductos(productos);
+    } catch (error) {
+        ajusteStockError = String(error?.message || 'No se pudo descontar stock');
+    }
+
     await db.collection('compras').add({
         id: Date.now(),
         fecha: new Date().toLocaleString('es-ES'),
@@ -98,7 +139,8 @@ async function registrarCompraDesdePago(paymentData) {
         timestamp: Date.now(),
         fechaCreacion: new Date(),
         origenPago: 'mercadopago',
-        paymentId
+        paymentId,
+        ajusteStockError
     });
 
     await carritoRef.set({
@@ -115,6 +157,7 @@ async function registrarCompraDesdePago(paymentData) {
         compraRegistrada: true,
         total: totalFinal,
         preferenceId: paymentData.order?.id || paymentData.metadata?.preferenceId || '',
+        ajusteStockError,
         updatedAt: new Date()
     }, { merge: true });
 }
@@ -581,6 +624,8 @@ app.post('/api/compras/:correo', async (req, res) => {
         if (!Array.isArray(productos) || productos.length === 0) {
             return res.status(400).json({ error: 'No hay productos para registrar la compra' });
         }
+
+        await descontarStockProductos(productos);
 
         const compra = {
             id: id || Date.now(),
