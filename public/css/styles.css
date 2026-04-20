@@ -1021,14 +1021,93 @@ input[type="file"] {
     display: flex;
     gap: 20px;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 24px auto;
+    padding: 0 20px 24px;
+    align-items: flex-start;
+}
+
+.payment-form {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 28px;
+    flex: 1;
+    min-height: 220px;
+    border: 1px solid #d6e7f5;
+    box-shadow: 0 8px 20px rgba(43, 109, 149, 0.08);
+}
+
+.payment-form h3 {
+    font-size: 1.35rem;
+    color: #1f2a44;
+    margin-bottom: 12px;
+}
+
+.payment-form p {
+    color: #44546a;
+    line-height: 1.65;
+    font-size: 0.98rem;
 }
 
 .summary-card {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 12px;
     flex: 0 0 350px;
+    border: 1px solid #d6e7f5;
+    box-shadow: 0 8px 20px rgba(43, 109, 149, 0.08);
+}
+
+.summary-card h3 {
+    font-size: 1.15rem;
+    color: #1f2a44;
+    margin-bottom: 16px;
+}
+
+.summary-card .line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    font-size: 0.98rem;
+    color: #2f3e52;
+    border-bottom: 1px solid #edf3f8;
+}
+
+.summary-card .line.total {
+    border-bottom: none;
+    padding-top: 16px;
+    margin-top: 8px;
+}
+
+#resumen-total {
+    font-size: 1.45rem;
+    color: #0c7f46;
+}
+
+#btn-finalizar {
+    width: 100%;
+    margin-top: 16px;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, #3a94ff 0%, #2f80ed 100%);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.97rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+#btn-finalizar:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(47, 128, 237, 0.28);
+}
+
+#btn-finalizar:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 /* --- RESPONSIVE GLOBAL --- */
@@ -1093,11 +1172,17 @@ input[type="file"] {
     .checkout-layout {
         flex-direction: column;
         padding: 0 12px;
+        margin-top: 16px;
+    }
+
+    .payment-form {
+        padding: 20px;
     }
 
     .summary-card {
         flex: 1 1 auto;
         width: 100%;
+        padding: 20px;
     }
 
     .product-grid {
