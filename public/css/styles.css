@@ -556,6 +556,34 @@ textarea {
     border-radius: 6px;
 }
 
+.password-field {
+    position: relative;
+}
+
+.password-field input[type="password"],
+.password-field input[type="text"] {
+    padding-right: 96px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 1px solid #cfd6e4;
+    background: #f8fbff;
+    color: #2b5ca7;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.toggle-password:hover {
+    background: #eef5ff;
+}
+
 form button[type="submit"] {
     width: 100%;
     margin-top: 10px;

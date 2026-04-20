@@ -133,3 +133,19 @@ async function eliminarDelCarrito(productoId) {
         alert('No se pudo eliminar del carrito');
     }
 }
+
+function irAPago() {
+    const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
+    if (!sesionActiva?.correo) {
+        alert('Debes iniciar sesión para continuar con el pago');
+        window.location.href = '/views/login.html';
+        return;
+    }
+
+    if (!carritoActual.length) {
+        alert('Tu carrito está vacío');
+        return;
+    }
+
+    window.location.href = '/views/pago.html';
+}

@@ -16,6 +16,25 @@ const auth = getAuth(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
 let procesandoSesionGoogle = false;
 
+function configurarTogglesPassword() {
+    const botonesToggle = document.querySelectorAll('.toggle-password');
+
+    botonesToggle.forEach((boton) => {
+        boton.addEventListener('click', () => {
+            const targetId = boton.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+
+            if (!input) {
+                return;
+            }
+
+            const visible = input.type === 'text';
+            input.type = visible ? 'password' : 'text';
+            boton.textContent = visible ? 'Mostrar' : 'Ocultar';
+        });
+    });
+}
+
 async function guardarSesionGoogle(user) {
     if (procesandoSesionGoogle) {
         return;
@@ -66,6 +85,11 @@ if (fReg) {
         const correo = document.getElementById('cor').value;
         const pass = document.getElementById('pas').value;
 
+        if (pass.length !== 6) {
+            alert('La contraseña debe tener exactamente 6 caracteres.');
+            return;
+        }
+
         try {
             const response = await fetch('/api/registro', {
                 method: 'POST',
@@ -94,6 +118,11 @@ if (fLog) {
         e.preventDefault();
         const correo = document.getElementById('l-cor').value;
         const pass = document.getElementById('l-pas').value;
+
+        if (pass.length !== 6) {
+            alert('La contraseña debe tener exactamente 6 caracteres.');
+            return;
+        }
 
         try {
             const response = await fetch('/api/login', {
@@ -126,3 +155,5 @@ const btnGoogleRegister = document.getElementById('btn-google-register');
 if (btnGoogleRegister) {
     btnGoogleRegister.addEventListener('click', iniciarConGoogle);
 }
+
+configurarTogglesPassword();

@@ -1,4 +1,7 @@
-document.addEventListener('DOMContentLoaded', cargarResumenPago);
+document.addEventListener('DOMContentLoaded', () => {
+    cargarResumenPago();
+    procesarRetornoPago();
+});
 
 async function obtenerCarritoUsuario(correo) {
     const response = await fetch(`/api/carrito/${encodeURIComponent(correo)}`);
@@ -29,7 +32,9 @@ async function cargarResumenPago() {
 }
 
 async function procesarPago() {
+    const boton = document.getElementById('btn-finalizar');
     const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
+
     if (!sesionActiva?.correo) {
         alert('Debes iniciar sesión para pagar');
         window.location.href = '/views/login.html';
@@ -44,35 +49,80 @@ async function procesarPago() {
             return;
         }
 
-        const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-        const compra = {
-            id: Date.now(),
-            fecha: new Date().toLocaleString('es-ES'),
-            cliente: sesionActiva?.nombreCompleto || sesionActiva?.nombre || 'Cliente',
-            productos: carrito,
-            total
-        };
+        if (boton) {
+            boton.disabled = true;
+            boton.textContent = 'Redirigiendo a Mercado Pago...';
+        }
 
-        const compraResponse = await fetch(`/api/compras/${encodeURIComponent(sesionActiva.correo)}`, {
+        const pagoResponse = await fetch('/api/pagos/crear-preferencia', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(compra)
+            body: JSON.stringify({
+                correo: sesionActiva.correo,
+                cliente: sesionActiva?.nombreCompleto || sesionActiva?.nombre || 'Cliente'
+            })
         });
 
-        if (!compraResponse.ok) {
-            const error = await compraResponse.json();
-            throw new Error(error.error || 'No se pudo registrar la compra');
+        if (!pagoResponse.ok) {
+            const error = await pagoResponse.json();
+            throw new Error(error.error || 'No se pudo iniciar el pago');
         }
 
-        await fetch(`/api/carrito/${encodeURIComponent(sesionActiva.correo)}`, { method: 'DELETE' });
+        const pagoData = await pagoResponse.json();
+        const urlPago = pagoData.initPoint || pagoData.sandboxInitPoint;
 
-        if (typeof actualizarContadorCarrito === 'function') {
-            actualizarContadorCarrito();
+        if (!urlPago) {
+            throw new Error('Mercado Pago no devolvió URL de checkout');
         }
 
-        alert('Procesando pago... ¡Gracias por tu compra!');
-        window.location.href = '/index.html';
+        window.location.href = urlPago;
     } catch (error) {
         alert('Error al procesar pago: ' + error.message);
+        if (boton) {
+            boton.disabled = false;
+            boton.textContent = 'Ir a pagar con Mercado Pago';
+        }
+    }
+}
+
+async function procesarRetornoPago() {
+    const params = new URLSearchParams(window.location.search);
+    const resultado = params.get('resultado');
+    const paymentId = params.get('payment_id');
+
+    if (!resultado) return;
+
+    if (!paymentId) {
+        if (resultado === 'failure') {
+            alert('El pago no fue aprobado. Intenta de nuevo.');
+        }
+        if (resultado === 'pending') {
+            alert('Tu pago quedó pendiente de confirmación.');
+        }
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/pagos/estado/${encodeURIComponent(paymentId)}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'No se pudo verificar el pago');
+        }
+
+        if (data.status === 'approved') {
+            alert('Pago aprobado. Tu compra quedó registrada ✅');
+            window.location.href = '/views/compras.html';
+            return;
+        }
+
+        if (data.status === 'pending' || data.status === 'in_process') {
+            alert('Tu pago está en revisión. Revisa en unos minutos.');
+            return;
+        }
+
+        alert('El pago no fue aprobado. Puedes intentar nuevamente.');
+    } catch (error) {
+        alert('No se pudo verificar el estado del pago: ' + error.message);
     }
 }

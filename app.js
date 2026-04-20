@@ -2,10 +2,132 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const fs = require('fs');
+require('dotenv').config();
 const admin = require('firebase-admin');
+const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 
 let db = null;
 let firebaseInitError = null;
+const mercadopagoAccessToken = String(process.env.MP_ACCESS_TOKEN || '').trim();
+const mercadopagoClient = mercadopagoAccessToken ? new MercadoPagoConfig({ accessToken: mercadopagoAccessToken }) : null;
+const mpPreference = mercadopagoClient ? new Preference(mercadopagoClient) : null;
+const mpPayment = mercadopagoClient ? new Payment(mercadopagoClient) : null;
+
+function obtenerBaseUrl(req) {
+    if (process.env.PUBLIC_BASE_URL) {
+        return String(process.env.PUBLIC_BASE_URL).trim().replace(/\/$/, '');
+    }
+
+    const proto = req.headers['x-forwarded-proto'] || req.protocol;
+    return `${proto}://${req.get('host')}`;
+}
+
+function esBaseUrlValidaParaCheckoutPro(baseUrl) {
+    try {
+        const url = new URL(baseUrl);
+        const host = (url.hostname || '').toLowerCase();
+        const esLocal = host === 'localhost' || host === '127.0.0.1' || host === '::1';
+        return (url.protocol === 'https:' || url.protocol === 'http:') && !esLocal;
+    } catch (error) {
+        return false;
+    }
+}
+
+async function registrarCompraDesdePago(paymentData) {
+    const paymentId = String(paymentData.id || '');
+    if (!paymentId) return;
+
+    const pagoRef = db.collection('pagos').doc(paymentId);
+    const pagoSnap = await pagoRef.get();
+
+    if (pagoSnap.exists && pagoSnap.data()?.compraRegistrada) {
+        return;
+    }
+
+    if (paymentData.status !== 'approved') {
+        await pagoRef.set({
+            paymentId,
+            status: paymentData.status || 'unknown',
+            statusDetail: paymentData.status_detail || '',
+            compraRegistrada: false,
+            updatedAt: new Date()
+        }, { merge: true });
+        return;
+    }
+
+    const correo = paymentData.metadata?.correo || '';
+    if (!correo) {
+        await pagoRef.set({
+            paymentId,
+            status: paymentData.status || 'approved',
+            statusDetail: paymentData.status_detail || '',
+            compraRegistrada: false,
+            error: 'No se encontro correo en metadata',
+            updatedAt: new Date()
+        }, { merge: true });
+        return;
+    }
+
+    const carritoRef = db.collection('carritos').doc(correo);
+    const carritoSnap = await carritoRef.get();
+    const productos = carritoSnap.exists ? (carritoSnap.data().items || []) : [];
+
+    const totalCalculado = productos.reduce((sum, item) => sum + ((Number(item.precio) || 0) * (Number(item.cantidad) || 0)), 0);
+    const totalFinal = Number(paymentData.transaction_amount) || totalCalculado;
+
+    if (!Array.isArray(productos) || productos.length === 0) {
+        await pagoRef.set({
+            paymentId,
+            correo,
+            status: paymentData.status || 'approved',
+            statusDetail: paymentData.status_detail || '',
+            compraRegistrada: false,
+            aviso: 'Pago aprobado sin items en carrito',
+            updatedAt: new Date()
+        }, { merge: true });
+        return;
+    }
+
+    await db.collection('compras').add({
+        id: Date.now(),
+        fecha: new Date().toLocaleString('es-ES'),
+        cliente: paymentData.metadata?.cliente || 'Cliente',
+        clienteCorreo: correo,
+        productos,
+        total: totalFinal,
+        timestamp: Date.now(),
+        fechaCreacion: new Date(),
+        origenPago: 'mercadopago',
+        paymentId
+    });
+
+    await carritoRef.set({
+        correo,
+        items: [],
+        updatedAt: new Date()
+    }, { merge: true });
+
+    await pagoRef.set({
+        paymentId,
+        correo,
+        status: paymentData.status || 'approved',
+        statusDetail: paymentData.status_detail || '',
+        compraRegistrada: true,
+        total: totalFinal,
+        preferenceId: paymentData.order?.id || paymentData.metadata?.preferenceId || '',
+        updatedAt: new Date()
+    }, { merge: true });
+}
+
+async function obtenerYProcesarPago(paymentId) {
+    if (!mpPayment) {
+        throw new Error('Mercado Pago no configurado. Define MP_ACCESS_TOKEN.');
+    }
+
+    const paymentData = await mpPayment.get({ id: paymentId });
+    await registrarCompraDesdePago(paymentData);
+    return paymentData;
+}
 
 // Inicializar Firebase Admin (Vercel: variables de entorno, Local: firebase-key.json)
 function obtenerCredencialesFirebase() {
@@ -92,6 +214,10 @@ app.get('/api/test', async (req, res) => {
 app.post('/api/registro', async (req, res) => {
     try {
         const { nombre, apellido = '', correo, pass } = req.body;
+
+        if (typeof pass !== 'string' || pass.length !== 6) {
+            return res.status(400).json({ error: 'La contraseña debe tener exactamente 6 caracteres' });
+        }
         
         // Verificar si el usuario ya existe
         const userRef = db.collection('usuarios').doc(correo);
@@ -120,6 +246,10 @@ app.post('/api/registro', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     try {
         const { correo, pass } = req.body;
+
+        if (typeof pass !== 'string' || pass.length !== 6) {
+            return res.status(400).json({ error: 'La contraseña debe tener exactamente 6 caracteres' });
+        }
         
         const userRef = db.collection('usuarios').doc(correo);
         const userSnap = await userRef.get();
@@ -256,15 +386,27 @@ app.post('/api/productos', async (req, res) => {
 app.put('/api/productos/:id', async (req, res) => {
     try {
         const { nombre, precio, stock, descripcion, imagen, vendedor } = req.body;
+        const productoRef = db.collection('productos').doc(req.params.id);
+        const productoSnap = await productoRef.get();
+
+        if (!productoSnap.exists) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
+
+        const actualizacion = {};
+
+        if (nombre !== undefined) actualizacion.nombre = nombre;
+        if (precio !== undefined) actualizacion.precio = precio;
+        if (stock !== undefined) actualizacion.stock = stock;
+        if (descripcion !== undefined) actualizacion.descripcion = descripcion;
+        if (imagen !== undefined) actualizacion.imagen = imagen;
+        if (vendedor !== undefined) actualizacion.vendedor = vendedor;
+
+        if (Object.keys(actualizacion).length === 0) {
+            return res.status(400).json({ error: 'No se enviaron campos válidos para actualizar' });
+        }
         
-        await db.collection('productos').doc(req.params.id).update({
-            nombre,
-            precio,
-            stock,
-            descripcion,
-            imagen,
-            vendedor
-        });
+        await productoRef.update(actualizacion);
         
         res.json({ mensaje: "Producto actualizado ✅" });
     } catch (error) {
@@ -455,6 +597,112 @@ app.post('/api/compras/:correo', async (req, res) => {
         res.json({ mensaje: 'Compra registrada ✅' });
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+// ========== PAGOS (MERCADO PAGO) ==========
+app.post('/api/pagos/crear-preferencia', async (req, res) => {
+    try {
+        if (!mpPreference) {
+            return res.status(500).json({ error: 'Mercado Pago no configurado. Falta MP_ACCESS_TOKEN.' });
+        }
+
+        const { correo, cliente } = req.body;
+        if (!correo) {
+            return res.status(400).json({ error: 'Correo requerido para iniciar el pago' });
+        }
+
+        const carritoSnap = await db.collection('carritos').doc(correo).get();
+        const itemsCarrito = carritoSnap.exists ? (carritoSnap.data().items || []) : [];
+
+        if (!Array.isArray(itemsCarrito) || itemsCarrito.length === 0) {
+            return res.status(400).json({ error: 'El carrito esta vacio' });
+        }
+
+        const currencyId = process.env.MP_CURRENCY_ID || 'COP';
+        const baseUrl = obtenerBaseUrl(req);
+
+        if (!esBaseUrlValidaParaCheckoutPro(baseUrl)) {
+            return res.status(400).json({
+                error: 'PUBLIC_BASE_URL invalida para Checkout Pro. Usa una URL publica (no localhost), por ejemplo con ngrok.'
+            });
+        }
+
+        const preferenceBody = {
+            items: itemsCarrito.map(item => ({
+                id: String(item.id),
+                title: item.nombre,
+                quantity: Number(item.cantidad) || 1,
+                currency_id: currencyId,
+                unit_price: Number(item.precio) || 0
+            })),
+            back_urls: {
+                success: `${baseUrl}/views/pago.html?resultado=success`,
+                failure: `${baseUrl}/views/pago.html?resultado=failure`,
+                pending: `${baseUrl}/views/pago.html?resultado=pending`
+            },
+            auto_return: 'approved',
+            external_reference: `${correo}|${Date.now()}`,
+            metadata: {
+                correo,
+                cliente: cliente || 'Cliente'
+            }
+        };
+
+        if (process.env.MP_WEBHOOK_URL) {
+            preferenceBody.notification_url = process.env.MP_WEBHOOK_URL;
+        }
+
+        const preferenceResponse = await mpPreference.create({ body: preferenceBody });
+
+        await db.collection('pagos').doc(String(preferenceResponse.id)).set({
+            preferenceId: String(preferenceResponse.id),
+            correo,
+            status: 'preference_created',
+            compraRegistrada: false,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        }, { merge: true });
+
+        res.json({
+            preferenceId: preferenceResponse.id,
+            initPoint: preferenceResponse.init_point,
+            sandboxInitPoint: preferenceResponse.sandbox_init_point
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/pagos/estado/:paymentId', async (req, res) => {
+    try {
+        const paymentId = req.params.paymentId;
+        const paymentData = await obtenerYProcesarPago(paymentId);
+
+        res.json({
+            id: paymentData.id,
+            status: paymentData.status,
+            statusDetail: paymentData.status_detail,
+            transactionAmount: paymentData.transaction_amount
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/pagos/webhook', async (req, res) => {
+    try {
+        const type = req.query.type || req.query.topic || req.body?.type || req.body?.topic;
+        const paymentId = req.query['data.id'] || req.query.id || req.body?.data?.id || req.body?.id;
+
+        if (type !== 'payment' || !paymentId) {
+            return res.status(200).json({ ok: true });
+        }
+
+        await obtenerYProcesarPago(String(paymentId));
+        return res.status(200).json({ ok: true });
+    } catch (error) {
+        return res.status(200).json({ ok: true, warning: error.message });
     }
 });
 

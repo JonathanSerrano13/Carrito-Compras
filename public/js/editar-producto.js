@@ -59,30 +59,48 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.preventDefault();
 
             const titulo = document.getElementById('e-titulo').value.trim();
-            const precio = parseFloat(document.getElementById('e-precio').value);
-            const stock = parseInt(document.getElementById('e-stock').value);
+            const precioTexto = document.getElementById('e-precio').value.trim();
+            const stockTexto = document.getElementById('e-stock').value.trim();
             const descripcion = document.getElementById('e-descripcion').value.trim();
             const inputImagen = document.getElementById('e-imagen');
 
-            if (!titulo || precio <= 0 || stock < 0 || !descripcion) {
-                alert("Por favor completa todos los campos correctamente");
-                return;
+            const productoActualizado = {};
+
+            if (titulo) {
+                productoActualizado.nombre = titulo;
+            }
+
+            if (precioTexto !== '') {
+                const precio = parseFloat(precioTexto);
+                if (Number.isNaN(precio) || precio <= 0) {
+                    alert("El precio debe ser mayor que 0.");
+                    return;
+                }
+                productoActualizado.precio = precio;
+            }
+
+            if (stockTexto !== '') {
+                const stock = parseInt(stockTexto, 10);
+                if (Number.isNaN(stock) || stock < 0) {
+                    alert("La cantidad disponible debe ser 0 o mayor.");
+                    return;
+                }
+                productoActualizado.stock = stock;
+            }
+
+            if (descripcion) {
+                productoActualizado.descripcion = descripcion;
             }
 
             // Si hay una nueva imagen, convertirla a base64
-            let nuevaImagen = productoOriginal.imagen;
             if (inputImagen.files.length > 0) {
-                nuevaImagen = await convertirArchivoABase64(inputImagen.files[0]);
+                productoActualizado.imagen = await convertirArchivoABase64(inputImagen.files[0]);
             }
 
-            // Actualizar producto en Firebase
-            const productoActualizado = {
-                nombre: titulo,
-                precio: precio,
-                stock: stock,
-                descripcion: descripcion,
-                imagen: nuevaImagen
-            };
+            if (Object.keys(productoActualizado).length === 0) {
+                alert("No hay cambios para guardar.");
+                return;
+            }
 
             try {
                 const updateResponse = await fetch(`/api/productos/${productoIdEnEdicion}`, {
