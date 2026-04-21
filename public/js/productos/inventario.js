@@ -1,3 +1,5 @@
+const MAX_IMAGE_SIZE_BYTES = 2.5 * 1024 * 1024;
+
 function convertirArchivoABase64(archivo) {
     return new Promise((resolve, reject) => {
         const lector = new FileReader();
@@ -13,14 +15,26 @@ function obtenerImagenProducto() {
         return Promise.resolve('img/default.jpg');
     }
 
-    return convertirArchivoABase64(inputImagen.files[0]);
+    const archivo = inputImagen.files[0];
+    if (archivo.size > MAX_IMAGE_SIZE_BYTES) {
+        return Promise.reject(new Error('La imagen pesa demasiado. Usa una imagen menor a 2.5 MB.'));
+    }
+
+    return convertirArchivoABase64(archivo);
 }
 
 // Función para publicar un producto desde vendedor.html
 async function publicarProducto(event) {
     event.preventDefault();
 
-    const imagenProducto = await obtenerImagenProducto();
+    let imagenProducto;
+    try {
+        imagenProducto = await obtenerImagenProducto();
+    } catch (error) {
+        alert(error.message || 'No se pudo procesar la imagen.');
+        return;
+    }
+
     const stockIngresado = parseInt(document.getElementById('v-stock').value, 10);
     const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
 
@@ -46,13 +60,19 @@ async function publicarProducto(event) {
             body: JSON.stringify(nuevoProducto)
         });
 
-        const data = await response.json();
+        const raw = await response.text();
+        let data = {};
+        try {
+            data = raw ? JSON.parse(raw) : {};
+        } catch (error) {
+            data = { error: raw || 'Respuesta inesperada del servidor' };
+        }
 
         if (response.ok) {
             alert("¡Producto publicado con éxito! ✅");
             window.location.href = '/index.html';
         } else {
-            alert("Error: " + data.error);
+            alert("Error: " + (data.error || 'No se pudo publicar el producto'));
         }
     } catch (error) {
         alert("Error en la conexión: " + error.message);

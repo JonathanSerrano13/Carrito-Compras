@@ -6,7 +6,8 @@ const { db, firebaseInitError } = require('./services/firebase.service');
 
 // Middleware
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
+app.use(express.json({ limit: '8mb' }));
+app.use(express.urlencoded({ extended: true, limit: '8mb' }));
 
 app.use('/api', (req, res, next) => {
     if (!db) {
@@ -33,6 +34,20 @@ app.use('/api', require('./routes/productos.routes'));
 app.use('/api', require('./routes/carrito.routes'));
 app.use('/api', require('./routes/compras.routes'));
 app.use('/api', require('./routes/pagos.routes'));
+
+app.use((err, req, res, next) => {
+    if (err && (err.type === 'entity.too.large' || err.status === 413)) {
+        return res.status(413).json({
+            error: 'La imagen es demasiado grande. Intenta con una imagen mas liviana (por ejemplo, menor a 2.5 MB).'
+        });
+    }
+
+    if (err) {
+        return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+
+    next();
+});
 
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     app.listen(3000, () => {
