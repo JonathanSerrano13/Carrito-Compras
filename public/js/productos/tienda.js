@@ -1,18 +1,25 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const contenedor = document.getElementById('catalogo-principal');
+    const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa') || 'null');
+    const correoUsuario = (sesionActiva?.correo || '').trim().toLowerCase();
     
     try {
         // Obtener productos desde Firebase
         const response = await fetch('/api/productos');
         const productos = await response.json();
 
-        if (productos.length === 0) {
+        const productosVisibles = productos.filter((producto) => {
+            const vendedorId = String(producto?.vendedorId || '').trim().toLowerCase();
+            return !correoUsuario || vendedorId !== correoUsuario;
+        });
+
+        if (productosVisibles.length === 0) {
             contenedor.innerHTML = "<p>No hay productos disponibles por ahora.</p>";
             return;
         }
 
         // Limpiamos el contenedor e inyectamos el HTML dinámico
-        contenedor.innerHTML = productos.map(p => `
+        contenedor.innerHTML = productosVisibles.map(p => `
             <div class="product-card ${p.stock === 0 ? 'product-agotado' : ''}" onclick="${p.stock === 0 ? '' : `verDetalle('${p.id}')`}">
                 <div class="product-image">
                     <img src="${p.imagen}" alt="${p.nombre}">
