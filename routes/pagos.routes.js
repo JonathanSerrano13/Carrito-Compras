@@ -39,7 +39,7 @@ router.post('/pagos/crear-preferencia', async (req, res) => {
             return res.status(400).json({ error: 'El carrito esta vacio' });
         }
 
-        const currencyId = String(process.env.MP_CURRENCY_ID || 'COP').trim().toUpperCase();
+        const currencyId = String(process.env.MP_CURRENCY_ID || 'MX').trim().toUpperCase();
         const baseUrl = obtenerBaseUrl(req);
 
         if (!esBaseUrlValidaParaCheckoutPro(baseUrl)) {
