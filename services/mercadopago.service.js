@@ -26,6 +26,52 @@ function esBaseUrlValidaParaCheckoutPro(baseUrl) {
     }
 }
 
+function extraerCorreoDePago(paymentData) {
+    const correoMetadata = String(paymentData?.metadata?.correo || '').trim();
+    if (correoMetadata) {
+        return correoMetadata;
+    }
+
+    const referencia = String(paymentData?.external_reference || '').trim();
+    if (!referencia) {
+        return '';
+    }
+
+    const [correoReferenciado] = referencia.split('|');
+    return String(correoReferenciado || '').trim();
+}
+
+async function obtenerDireccionEnvioDesdePagos(correo) {
+    if (!correo) {
+        return null;
+    }
+
+    const snapshot = await db.collection('pagos')
+        .where('correo', '==', correo)
+        .get();
+
+    const registros = [];
+    snapshot.forEach(doc => {
+        const data = doc.data() || {};
+        const direccionEnvio = data.direccionEnvio || null;
+        const tieneDireccion = direccionEnvio && Object.values(direccionEnvio).some(valor => String(valor || '').trim());
+
+        if (tieneDireccion) {
+            registros.push({
+                direccionEnvio,
+                createdAt: data.createdAt ? new Date(data.createdAt).getTime() : 0
+            });
+        }
+    });
+
+    if (registros.length === 0) {
+        return null;
+    }
+
+    registros.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    return registros[0].direccionEnvio;
+}
+
 async function descontarStockProductos(productos) {
     if (!Array.isArray(productos) || productos.length === 0) {
         return;
@@ -81,14 +127,17 @@ async function registrarCompraDesdePago(paymentData) {
         return;
     }
 
-    const correo = paymentData.metadata?.correo || '';
-    const direccionEnvio = {
+    const correo = extraerCorreoDePago(paymentData);
+    const direccionEnvioMetadata = {
         nombre: String(paymentData.metadata?.envioNombre || '').trim(),
         telefono: String(paymentData.metadata?.envioTelefono || '').trim(),
         ciudad: String(paymentData.metadata?.envioCiudad || '').trim(),
         direccion: String(paymentData.metadata?.envioDireccion || '').trim(),
         referencia: String(paymentData.metadata?.envioReferencia || '').trim()
     };
+    const direccionEnvio = Object.values(direccionEnvioMetadata).some(valor => String(valor || '').trim())
+        ? direccionEnvioMetadata
+        : (await obtenerDireccionEnvioDesdePagos(correo)) || direccionEnvioMetadata;
     if (!correo) {
         await pagoRef.set({
             paymentId,
