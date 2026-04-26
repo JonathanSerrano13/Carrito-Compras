@@ -93,7 +93,8 @@ router.post('/pagos/crear-preferencia', async (req, res) => {
         res.json({
             preferenceId: preferenceResponse.id,
             initPoint: preferenceResponse.init_point,
-            sandboxInitPoint: preferenceResponse.sandbox_init_point
+            sandboxInitPoint: preferenceResponse.sandbox_init_point,
+            modoPrueba: String(process.env.MP_ACCESS_TOKEN || '').trim().startsWith('TEST-')
         });
     } catch (error) {
         const mensaje = String(error?.message || 'Error al crear preferencia en Mercado Pago');

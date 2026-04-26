@@ -142,7 +142,9 @@ async function procesarPago() {
         }
 
         const pagoData = await pagoResponse.json();
-        const urlPago = pagoData.initPoint || pagoData.sandboxInitPoint;
+        const urlPago = pagoData.modoPrueba
+            ? (pagoData.sandboxInitPoint || pagoData.initPoint)
+            : (pagoData.initPoint || pagoData.sandboxInitPoint);
 
         if (!urlPago) {
             throw new Error('Mercado Pago no devolvió URL de checkout');
