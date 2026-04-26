@@ -17,7 +17,7 @@ const googleProvider = new GoogleAuthProvider();
 let procesandoSesionGoogle = false;
 
 function configurarTogglesPassword() {
-    const botonesToggle = document.querySelectorAll('.toggle-password');
+    const botonesToggle = document.querySelectorAll('.boton-contrasena, .toggle-password');
 
     botonesToggle.forEach((boton) => {
         boton.addEventListener('click', () => {

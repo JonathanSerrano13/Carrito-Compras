@@ -41,20 +41,20 @@ async function renderizarMisPublicaciones() {
     const misProductos = await obtenerProductosPublicados();
 
     if (misProductos.length === 0) {
-        contenedor.innerHTML = '<p class="publicaciones-vacio">No has publicado productos aún</p>';
+        contenedor.innerHTML = '<p class="estado-vacio">No has publicado productos aún</p>';
         return;
     }
 
     contenedor.innerHTML = misProductos.map(producto => `
-        <div class="publicacion-card">
+        <div class="tarjeta-publicacion tarjeta-base">
             <img src="${producto.imagen}" alt="${producto.nombre}">
-            <div class="publicacion-info">
-                <h3>${producto.nombre}</h3>
-                <div class="publicacion-precio">$${producto.precio.toLocaleString()}</div>
-                <div class="publicacion-stock">Stock: ${producto.stock}</div>
-                <div class="publicacion-botones">
-                    <button class="publicacion-edit" onclick="editarProducto('${producto.id}')">Editar</button>
-                    <button class="publicacion-delete" onclick="eliminarPublicacion('${producto.id}')">Dar de baja</button>
+            <div class="info-publicacion">
+                <h3 class="nombre-publicacion">${producto.nombre}</h3>
+                <div class="precio-publicacion">$${producto.precio.toLocaleString()}</div>
+                <div class="stock-publicacion">Stock: ${producto.stock}</div>
+                <div class="acciones-publicacion">
+                    <button class="boton-publicacion-editar boton-secundario" onclick="editarProducto('${producto.id}')">Editar</button>
+                    <button class="boton-publicacion-eliminar boton-peligro" onclick="eliminarPublicacion('${producto.id}')">Dar de baja</button>
                 </div>
             </div>
         </div>

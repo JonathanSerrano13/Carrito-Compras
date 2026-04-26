@@ -24,14 +24,12 @@
         </div>
     </div>
 
-    <div class="product-container">
-        <div class="product-gallery">
-            <div class="main-image">
-                <img id="p-img-principal" src="" alt="Cargando...">
-            </div>
-        </div>
+    <main class="product-layout">
+        <section class="product-media">
+            <img id="p-img-principal" src="" alt="Cargando...">
+        </section>
 
-        <div class="product-main-info">
+        <section class="product-content">
             <h2 id="p-titulo-dinamico"></h2>
 
             <div class="product-description">
@@ -46,14 +44,14 @@
             <div class="info-vendedor-debajo">
                 <p>Vendido por: <strong id="p-nombre-vendedor"></strong></p>
             </div>
-        </div>
+        </section>
 
-        <aside class="purchase-box">
+        <aside class="product-buy">
 
             <div class="selector-cantidad">
                 <label>Cantidad:</label>
                 <div class="cantidad-fila">
-                    <div class="control-stock">
+                    <div class="qty-control">
                         <button type="button" onclick="cambiarCantidad(-1)">-</button>
                         <input type="number" id="p-cantidad-seleccionada" value="1" min="1" readonly>
                         <button type="button" onclick="cambiarCantidad(1)">+</button>
@@ -63,11 +61,11 @@
             </div>
 
             <div class="cta-buttons">
-                <button class="btn-buy" onclick="comprarDirecto()">Comprar ahora</button>
-                <button class="btn-cart" onclick="agregarAlCarrito()">Agregar al carrito</button>
+                <button class="boton-comprar" onclick="comprarDirecto()">Comprar ahora</button>
+                <button class="boton-carrito" onclick="agregarAlCarrito()">Agregar al carrito</button>
             </div>
         </aside>
-    </div>
+    </main>
 
     <script src="../../js/compartido/sesion.js"></script>
     <script src="../../js/productos/producto.js"></script>

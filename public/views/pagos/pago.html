@@ -24,25 +24,56 @@
         </div>
     </div>
 
-    <div class="checkout-layout">
-        <div class="payment-form">
+    <main class="pagina-pago">
+        <section class="tarjeta-pago panel-pago tarjeta-base">
             <h3>Pago Seguro</h3>
             <p>Serás redirigido al checkout oficial de Mercado Pago para completar tu compra.</p>
-        </div>
 
-        <aside class="summary-card">
+            <section class="bloque-envio" aria-labelledby="titulo-envio">
+                <h4 id="titulo-envio">Dirección de envío</h4>
+
+                <div class="fila-envio">
+                    <div class="campo-envio">
+                        <label for="envio-nombre">Recibe</label>
+                        <input type="text" id="envio-nombre" placeholder="Nombre y apellido" autocomplete="name" required>
+                    </div>
+                    <div class="campo-envio">
+                        <label for="envio-telefono">Teléfono</label>
+                        <input type="tel" id="envio-telefono" placeholder="3001234567" autocomplete="tel" required>
+                    </div>
+                </div>
+
+                <div class="fila-envio">
+                    <div class="campo-envio">
+                        <label for="envio-ciudad">Ciudad</label>
+                        <input type="text" id="envio-ciudad" placeholder="Bogotá" autocomplete="address-level2" required>
+                    </div>
+                    <div class="campo-envio">
+                        <label for="envio-direccion">Dirección</label>
+                        <input type="text" id="envio-direccion" placeholder="Calle 123 #45-67" autocomplete="street-address" required>
+                    </div>
+                </div>
+
+                <div class="campo-envio campo-envio--completo">
+                    <label for="envio-referencia">Referencia (opcional)</label>
+                    <input type="text" id="envio-referencia" placeholder="Apto, piso, torre o indicaciones adicionales">
+                </div>
+            </section>
+        </section>
+
+        <aside class="tarjeta-pago resumen-pago tarjeta-base">
             <h3>Resumen</h3>
-            <div class="line">
+            <div class="linea-pago">
                 <span>Productos:</span>
                 <span id="resumen-subtotal">$0.00</span>
             </div>
-            <div class="line total">
+            <div class="linea-pago linea-pago--total">
                 <span>Total a pagar:</span>
                 <strong id="resumen-total">$0.00</strong>
             </div>
-            <button id="btn-finalizar" onclick="procesarPago()">Ir a pagar con Mercado Pago</button>
+            <button id="btn-finalizar" class="boton-finalizar boton-principal" onclick="procesarPago()">Ir a pagar con Mercado Pago</button>
         </aside>
-    </div>
+    </main>
 
     <script src="../../js/compartido/sesion.js"></script>
     <script src="../../js/pagos/pago.js"></script>

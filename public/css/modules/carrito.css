@@ -1,0 +1,133 @@
+/* --- CARRITO --- */
+.pagina-carrito {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.tarjeta-carrito {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: 20px;
+}
+
+.desplazamiento-carrito {
+    overflow-x: auto;
+}
+
+.cart-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 560px;
+}
+
+.fila-cabecera-carrito {
+    border-bottom: 2px solid #ececec;
+}
+
+.cart-table th,
+.cart-table td {
+    text-align: left;
+    padding: 14px 10px;
+}
+
+.cart-row {
+    border-bottom: 1px solid #efefef;
+}
+
+.cart-product-cell {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.cart-product-cell img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ececec;
+    background: #fff;
+}
+
+.cart-product-cell strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #1f2a44;
+}
+
+.cart-product-cell small {
+    color: #666;
+}
+
+.cart-qty-control {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #d7d7d7;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 6px;
+}
+
+.cart-qty-control button {
+    width: 28px;
+    height: 26px;
+    border: none;
+    background: #f3f4f6;
+    color: #1f2a44;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cart-qty-control button:hover {
+    background: #e6e9ee;
+}
+
+.cart-qty-value {
+    width: 36px;
+    height: 26px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1f2a44;
+    background: #fff;
+}
+
+.cart-subtotal {
+    font-weight: 700;
+    color: #1f2a44;
+}
+
+.cart-remove-btn {
+    background: transparent;
+    color: #3483fa;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cart-remove-btn:hover {
+    text-decoration: underline;
+}
+
+.pie-carrito {
+    margin-top: 20px;
+    border-top: 1px solid #efefef;
+    padding-top: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.pie-carrito h3 {
+    color: #1f2a44;
+}
+
+.cart-pay-btn {
+    padding: 10px 24px;
+    cursor: pointer;
+}

@@ -23,14 +23,14 @@
             <nav id="menu-usuario" class="user-menu"></nav>
         </div>
     </div>
-    <div class="container">
-        <section class="cart-wrapper">
-            <h2 class="cart-title">Tu Carrito</h2>
+    <main class="pagina-carrito">
+        <section class="tarjeta-carrito tarjeta-base">
+            <h2 class="titulo-seccion">Tu Carrito</h2>
 
-            <div class="cart-table-wrap">
+            <div class="desplazamiento-carrito">
                 <table class="cart-table">
                     <thead>
-                        <tr>
+                        <tr class="fila-cabecera-carrito">
                             <th>Producto</th>
                             <th>Subtotal</th>
                             <th>Accion</th>
@@ -40,12 +40,12 @@
                 </table>
             </div>
 
-            <div class="cart-summary">
+            <div class="pie-carrito">
                 <h3>Total: $<span id="total-compra">0.00</span></h3>
-                <button class="cart-pay-btn" onclick="irAPago()">Pagar ahora</button>
+                <button class="cart-pay-btn boton-principal" onclick="irAPago()">Pagar ahora</button>
             </div>
         </section>
-    </div>
+    </main>
     <script src="../../js/compartido/sesion.js"></script>
     <script src="../../js/carrito/carrito.js"></script>
 </body>

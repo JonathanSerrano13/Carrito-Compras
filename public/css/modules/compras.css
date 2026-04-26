@@ -1,0 +1,126 @@
+/* --- HISTORIAL DE COMPRAS --- */
+.pagina-compras {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.tarjeta-compras {
+    padding: 20px;
+}
+
+.lista-compras {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tarjeta-orden {
+    border: 1px solid #ececec;
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.cabecera-orden {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: #fafafa;
+    border-bottom: 1px solid #ececec;
+}
+
+.cabecera-orden h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #1f2a44;
+}
+
+.fecha-orden {
+    margin: 4px 0 0 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.total-orden {
+    font-size: 0.95rem;
+    color: #1f2a44;
+}
+
+.total-orden strong {
+    color: #00a650;
+}
+
+.envio-orden {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fcfdff;
+}
+
+.etiqueta-envio {
+    font-weight: 700;
+    color: #1f2a44;
+    font-size: 0.86rem;
+    white-space: nowrap;
+}
+
+.detalle-envio {
+    color: #4a5568;
+    font-size: 0.86rem;
+    line-height: 1.5;
+}
+
+.productos-orden {
+    padding: 16px;
+}
+
+.productos-orden h4 {
+    margin: 0 0 12px 0;
+    font-size: 0.95rem;
+    color: #1f2a44;
+}
+
+.productos-orden ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.productos-orden li {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.imagen-orden {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    border: 1px solid #ececec;
+    border-radius: 4px;
+    background: #fafafa;
+}
+
+.info-orden {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nombre-orden {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #1f2a44;
+}
+
+.meta-orden {
+    font-size: 0.8rem;
+    color: #666;
+}

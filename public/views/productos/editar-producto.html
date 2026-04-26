@@ -24,25 +24,25 @@
         </div>
     </div>
 
-    <div class="container vendedor-page">
-        <form id="form-editar" class="vendedor-form">
+    <main class="pagina-editar">
+        <form id="form-editar" class="formulario-editar tarjeta-base">
             <h2 class="form-title">Editar Producto</h2>
             <input type="text" id="e-titulo" placeholder="Nombre del producto">
-            <div class="v-row">
+            <div class="fila-editar">
                 <input type="number" id="e-precio" placeholder="Precio ($)">
                 <input type="number" id="e-stock" placeholder="Cantidad disponible" min="0" step="1">
             </div>
 
-            <label for="e-imagen" class="file-label">Imagen del producto (opcional)</label>
+            <label for="e-imagen" class="etiqueta-archivo">Imagen del producto (opcional)</label>
             <input type="file" id="e-imagen" accept="image/*">
-            <img id="e-preview-imagen" class="img-preview" alt="Vista previa de imagen" hidden>
+            <img id="e-preview-imagen" class="vista-previa-imagen" alt="Vista previa de imagen" hidden>
 
             <textarea id="e-descripcion" placeholder="Detalles, estado del producto, etc."></textarea>
 
-            <button type="submit">Guardar Cambios</button>
-            <a href="publicaciones.html" class="vendedor-manage-link">Volver a mis publicaciones</a>
+            <button type="submit" class="boton-formulario boton-principal">Guardar Cambios</button>
+            <a href="publicaciones.html" class="enlace-gestion-vendedor">Volver a mis publicaciones</a>
         </form>
-    </div>
+    </main>
 
     <script src="../../js/compartido/sesion.js"></script>
     <script src="../../js/productos/editar-producto.js"></script>

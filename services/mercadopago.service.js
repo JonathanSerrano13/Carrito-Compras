@@ -82,6 +82,13 @@ async function registrarCompraDesdePago(paymentData) {
     }
 
     const correo = paymentData.metadata?.correo || '';
+    const direccionEnvio = {
+        nombre: String(paymentData.metadata?.envioNombre || '').trim(),
+        telefono: String(paymentData.metadata?.envioTelefono || '').trim(),
+        ciudad: String(paymentData.metadata?.envioCiudad || '').trim(),
+        direccion: String(paymentData.metadata?.envioDireccion || '').trim(),
+        referencia: String(paymentData.metadata?.envioReferencia || '').trim()
+    };
     if (!correo) {
         await pagoRef.set({
             paymentId,
@@ -126,6 +133,7 @@ async function registrarCompraDesdePago(paymentData) {
         fecha: new Date().toLocaleString('es-ES'),
         cliente: paymentData.metadata?.cliente || 'Cliente',
         clienteCorreo: correo,
+        direccionEnvio,
         productos,
         total: totalFinal,
         timestamp: Date.now(),
@@ -144,6 +152,7 @@ async function registrarCompraDesdePago(paymentData) {
     await pagoRef.set({
         paymentId,
         correo,
+        direccionEnvio,
         status: paymentData.status || 'approved',
         statusDetail: paymentData.status_detail || '',
         compraRegistrada: true,

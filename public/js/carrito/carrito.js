@@ -24,7 +24,7 @@ function renderizarCarrito(items) {
     carritoActual = items;
 
     if (!items || items.length === 0) {
-        listaCarrito.innerHTML = '<tr><td colspan="3" class="cart-empty">Tu carrito está vacío</td></tr>';
+        listaCarrito.innerHTML = '<tr><td colspan="3" class="estado-vacio">Tu carrito está vacío</td></tr>';
         totalElement.innerText = '0';
         actualizarContadorLocal([]);
         return;
@@ -71,7 +71,7 @@ async function cargarCarrito() {
     const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
 
     if (!sesionActiva?.correo) {
-        listaCarrito.innerHTML = '<tr><td colspan="3" class="cart-empty">Debes iniciar sesión</td></tr>';
+        listaCarrito.innerHTML = '<tr><td colspan="3" class="estado-vacio">Debes iniciar sesión</td></tr>';
         totalElement.innerText = '0';
         return;
     }
@@ -80,7 +80,7 @@ async function cargarCarrito() {
         const items = await obtenerCarritoUsuario(sesionActiva.correo);
         renderizarCarrito(items);
     } catch (error) {
-        listaCarrito.innerHTML = '<tr><td colspan="3" class="cart-empty">Error al cargar carrito</td></tr>';
+        listaCarrito.innerHTML = '<tr><td colspan="3" class="estado-vacio">Error al cargar carrito</td></tr>';
         totalElement.innerText = '0';
     }
 }

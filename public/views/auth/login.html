@@ -15,24 +15,24 @@
             <div class="header-spacer" aria-hidden="true"></div>
         </div>
     </header>
-    <div class="container" style="max-width: 400px;">
+    <main class="pagina-autenticacion">
+        <section class="tarjeta-base tarjeta-autenticacion">
         <form id="form-login">
             <h2 class="form-title">Iniciar Sesion</h2>
             <input type="email" id="l-cor" placeholder="Correo" required>
             <div class="password-field">
                 <input type="password" id="l-pas" placeholder="Contrasena (exactamente 6 caracteres)" minlength="6" maxlength="6" required>
-                <button type="button" class="toggle-password" data-target="l-pas" aria-label="Mostrar u ocultar contrasena">Mostrar</button>
+                <button type="button" class="boton-contrasena boton-secundario" data-target="l-pas" aria-label="Mostrar u ocultar contrasena">Mostrar</button>
             </div>
-            <button type="submit">Entrar</button>
+            <button type="submit" class="boton-formulario boton-principal">Entrar</button>
 
-            <button type="button" id="btn-google-login" class="google-auth-btn">
-                Iniciar con Google
-            </button>
+            <button type="button" id="btn-google-login" class="boton-google-aut boton-secundario">Iniciar con Google</button>
 
             <div class="form-separator"></div>
-            <p class="auth-switch">No tienes cuenta? <a href="register.html">Registrate</a></p>
+            <p class="cambio-autenticacion">No tienes cuenta? <a href="register.html">Registrate</a></p>
         </form>
-    </div>
+        </section>
+    </main>
     <script type="module" src="../../js/auth/auth.js"></script>
 </body>
 

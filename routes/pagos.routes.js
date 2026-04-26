@@ -15,9 +15,21 @@ router.post('/pagos/crear-preferencia', async (req, res) => {
             return res.status(500).json({ error: 'Mercado Pago no configurado. Falta MP_ACCESS_TOKEN.' });
         }
 
-        const { correo, cliente } = req.body;
+        const { correo, cliente, direccionEnvio } = req.body;
         if (!correo) {
             return res.status(400).json({ error: 'Correo requerido para iniciar el pago' });
+        }
+
+        const direccionNormalizada = {
+            nombre: String(direccionEnvio?.nombre || '').trim(),
+            telefono: String(direccionEnvio?.telefono || '').trim(),
+            ciudad: String(direccionEnvio?.ciudad || '').trim(),
+            direccion: String(direccionEnvio?.direccion || '').trim(),
+            referencia: String(direccionEnvio?.referencia || '').trim()
+        };
+
+        if (!direccionNormalizada.nombre || !direccionNormalizada.telefono || !direccionNormalizada.ciudad || !direccionNormalizada.direccion) {
+            return res.status(400).json({ error: 'Faltan datos de direccion de envio.' });
         }
 
         const carritoSnap = await db.collection('carritos').doc(correo).get();
@@ -53,7 +65,12 @@ router.post('/pagos/crear-preferencia', async (req, res) => {
             external_reference: `${correo}|${Date.now()}`,
             metadata: {
                 correo,
-                cliente: cliente || 'Cliente'
+                cliente: cliente || 'Cliente',
+                envioNombre: direccionNormalizada.nombre,
+                envioTelefono: direccionNormalizada.telefono,
+                envioCiudad: direccionNormalizada.ciudad,
+                envioDireccion: direccionNormalizada.direccion,
+                envioReferencia: direccionNormalizada.referencia
             }
         };
 
@@ -66,6 +83,7 @@ router.post('/pagos/crear-preferencia', async (req, res) => {
         await db.collection('pagos').doc(String(preferenceResponse.id)).set({
             preferenceId: String(preferenceResponse.id),
             correo,
+            direccionEnvio: direccionNormalizada,
             status: 'preference_created',
             compraRegistrada: false,
             createdAt: new Date(),

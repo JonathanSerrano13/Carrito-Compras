@@ -48,8 +48,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // Deshabilitar botones si no hay stock
-            const btnBuy = document.querySelector('.btn-buy');
-            const btnCart = document.querySelector('.btn-cart');
+            const btnBuy = document.querySelector('.boton-comprar');
+            const btnCart = document.querySelector('.boton-carrito');
             if (stockMaximo === 0) {
                 if (btnBuy) {
                     btnBuy.disabled = true;
@@ -142,5 +142,25 @@ async function agregarAlCarrito() {
 }
 
 async function comprarDirecto() {
-    return;
+    const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
+
+    if (!sesionActiva?.correo) {
+        alert('Debes iniciar sesión para comprar');
+        window.location.href = '/views/auth/login.html';
+        return;
+    }
+
+    if (!productoActual) {
+        alert('No se pudo cargar el producto');
+        return;
+    }
+
+    const cantidad = parseInt(document.getElementById('p-cantidad-seleccionada').value, 10) || 1;
+
+    const agregado = await agregarProductoEnCarrito(productoActual, cantidad, sesionActiva.correo);
+    if (!agregado) {
+        return;
+    }
+
+    window.location.href = '/views/pagos/pago.html';
 }

@@ -1,7 +1,72 @@
 document.addEventListener('DOMContentLoaded', () => {
+    inicializarFormularioEnvio();
     cargarResumenPago();
     procesarRetornoPago();
 });
+
+function obtenerCamposEnvio() {
+    return {
+        nombre: document.getElementById('envio-nombre'),
+        telefono: document.getElementById('envio-telefono'),
+        ciudad: document.getElementById('envio-ciudad'),
+        direccion: document.getElementById('envio-direccion'),
+        referencia: document.getElementById('envio-referencia')
+    };
+}
+
+function obtenerDireccionEnvio() {
+    const campos = obtenerCamposEnvio();
+    return {
+        nombre: (campos.nombre?.value || '').trim(),
+        telefono: (campos.telefono?.value || '').trim(),
+        ciudad: (campos.ciudad?.value || '').trim(),
+        direccion: (campos.direccion?.value || '').trim(),
+        referencia: (campos.referencia?.value || '').trim()
+    };
+}
+
+function validarDireccionEnvio(direccion) {
+    if (!direccion.nombre) {
+        return { esValida: false, mensaje: 'Ingresa el nombre de quien recibe.' };
+    }
+
+    if (!direccion.telefono) {
+        return { esValida: false, mensaje: 'Ingresa un teléfono de contacto.' };
+    }
+
+    if (!direccion.ciudad) {
+        return { esValida: false, mensaje: 'Ingresa la ciudad de entrega.' };
+    }
+
+    if (!direccion.direccion) {
+        return { esValida: false, mensaje: 'Ingresa la dirección de envío.' };
+    }
+
+    return { esValida: true, mensaje: '' };
+}
+
+function actualizarEstadoBotonPago() {
+    const boton = document.getElementById('btn-finalizar');
+    if (!boton) return;
+
+    const validacion = validarDireccionEnvio(obtenerDireccionEnvio());
+    boton.disabled = !validacion.esValida;
+}
+
+function inicializarFormularioEnvio() {
+    const campos = obtenerCamposEnvio();
+    const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
+    if (campos.nombre && sesionActiva?.nombreCompleto) {
+        campos.nombre.value = sesionActiva.nombreCompleto;
+    }
+
+    [campos.nombre, campos.telefono, campos.ciudad, campos.direccion, campos.referencia].forEach((campo) => {
+        if (!campo) return;
+        campo.addEventListener('input', actualizarEstadoBotonPago);
+    });
+
+    actualizarEstadoBotonPago();
+}
 
 async function obtenerCarritoUsuario(correo) {
     const response = await fetch(`/api/carrito/${encodeURIComponent(correo)}`);
@@ -34,10 +99,17 @@ async function cargarResumenPago() {
 async function procesarPago() {
     const boton = document.getElementById('btn-finalizar');
     const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
+    const direccionEnvio = obtenerDireccionEnvio();
+    const validacionEnvio = validarDireccionEnvio(direccionEnvio);
 
     if (!sesionActiva?.correo) {
         alert('Debes iniciar sesión para pagar');
         window.location.href = '/views/auth/login.html';
+        return;
+    }
+
+    if (!validacionEnvio.esValida) {
+        alert(validacionEnvio.mensaje);
         return;
     }
 
@@ -59,7 +131,8 @@ async function procesarPago() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 correo: sesionActiva.correo,
-                cliente: sesionActiva?.nombreCompleto || sesionActiva?.nombre || 'Cliente'
+                cliente: sesionActiva?.nombreCompleto || sesionActiva?.nombre || 'Cliente',
+                direccionEnvio
             })
         });
 
