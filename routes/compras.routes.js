@@ -9,10 +9,30 @@ router.get('/compras/:correo', async (req, res) => {
         const correo = req.params.correo;
         const snapshot = await db.collection('compras').where('clienteCorreo', '==', correo).get();
         const compras = [];
+        const pagosCache = new Map();
 
         snapshot.forEach(doc => {
             compras.push({ idDoc: doc.id, ...doc.data() });
         });
+
+        for (const compra of compras) {
+            const sinDireccion = !compra.direccionEnvio || Object.values(compra.direccionEnvio || {}).every(valor => !String(valor || '').trim());
+            const paymentId = String(compra.paymentId || '').trim();
+
+            if (!sinDireccion || !paymentId) {
+                continue;
+            }
+
+            if (!pagosCache.has(paymentId)) {
+                const pagoSnap = await db.collection('pagos').doc(paymentId).get();
+                pagosCache.set(paymentId, pagoSnap.exists ? (pagoSnap.data() || {}) : {});
+            }
+
+            const pagoData = pagosCache.get(paymentId) || {};
+            if (pagoData.direccionEnvio) {
+                compra.direccionEnvio = pagoData.direccionEnvio;
+            }
+        }
 
         compras.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         res.json(compras);

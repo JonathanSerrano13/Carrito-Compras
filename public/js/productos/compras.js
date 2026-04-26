@@ -3,11 +3,11 @@ document.addEventListener('DOMContentLoaded', cargarCompras);
 function construirTextoEnvio(direccionEnvio) {
     if (!direccionEnvio) return '';
 
-    const nombre = String(direccionEnvio.nombre || '').trim();
-    const telefono = String(direccionEnvio.telefono || '').trim();
-    const ciudad = String(direccionEnvio.ciudad || '').trim();
-    const direccion = String(direccionEnvio.direccion || '').trim();
-    const referencia = String(direccionEnvio.referencia || '').trim();
+    const nombre = String(direccionEnvio.nombre || direccionEnvio.recibe || '').trim();
+    const telefono = String(direccionEnvio.telefono || direccionEnvio.celular || '').trim();
+    const ciudad = String(direccionEnvio.ciudad || direccionEnvio.municipio || '').trim();
+    const direccion = String(direccionEnvio.direccion || direccionEnvio.direccion1 || direccionEnvio.address || '').trim();
+    const referencia = String(direccionEnvio.referencia || direccionEnvio.referencias || '').trim();
 
     if (!nombre && !telefono && !ciudad && !direccion && !referencia) {
         return '';
@@ -55,12 +55,10 @@ async function cargarCompras() {
                         Total: <strong>$${Number(compra.total || 0).toLocaleString()}</strong>
                     </div>
                 </div>
-                ${detalleEnvio ? `
                 <div class="envio-orden">
                     <span class="etiqueta-envio">Envío:</span>
-                    <span class="detalle-envio">${detalleEnvio}</span>
+                    <span class="detalle-envio">${detalleEnvio || 'Sin dirección registrada en esta compra.'}</span>
                 </div>
-                ` : ''}
                 <div class="productos-orden">
                     <h4>Productos:</h4>
                     <ul>
