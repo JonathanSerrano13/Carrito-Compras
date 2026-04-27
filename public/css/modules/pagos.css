@@ -33,6 +33,65 @@
     font-size: 0.98rem;
 }
 
+.bloque-direcciones {
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #f7fbff 0%, #eef6fc 100%);
+    border: 1px solid #dbeaf7;
+}
+
+.cabecera-direcciones h4 {
+    font-size: 1.02rem;
+    color: #1f2a44;
+    margin-bottom: 4px;
+}
+
+.cabecera-direcciones p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: #506079;
+}
+
+.campo-direccion-guardada {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.campo-direccion-guardada label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #2f3e52;
+}
+
+.campo-direccion-guardada select,
+.campo-envio select {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid #cfe1f1;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #1f2a44;
+    background: #ffffff;
+    margin: 0;
+}
+
+.campo-direccion-guardada select:focus,
+.campo-envio select:focus {
+    outline: none;
+    border-color: #62a9ee;
+    box-shadow: 0 0 0 3px rgba(98, 169, 238, 0.18);
+}
+
+.mensaje-direcciones {
+    font-size: 0.82rem;
+    color: #607086;
+    line-height: 1.45;
+}
+
 .bloque-envio {
     margin-top: 20px;
     padding-top: 18px;
