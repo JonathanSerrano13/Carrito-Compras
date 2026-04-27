@@ -38,5 +38,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Función para ir a la vista de detalle
 function verDetalle(id) {
-    window.location.href = `/views/productos/producto.html?id=${id}`;
+    window.location.href = `/views/producto.html?id=${id}`;
 }

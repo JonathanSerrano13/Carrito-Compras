@@ -37,18 +37,18 @@ if (menu) {
                     <button class="perfil-menu-btn" onclick="toggleDropdown()" title="Menú">▼</button>
                 </div>
                 <div class="perfil-dropdown" id="perfil-dropdown">
-                    <a href="/views/productos/vendedor.html" class="dropdown-item">Vender</a>
-                    <a href="/views/productos/publicaciones.html" class="dropdown-item">Mis publicaciones</a>
-                    <a href="/views/productos/compras.html" class="dropdown-item">Mis compras</a>
+                    <a href="/views/vendedor.html" class="dropdown-item">Vender</a>
+                    <a href="/views/publicaciones.html" class="dropdown-item">Mis publicaciones</a>
+                    <a href="/views/compras.html" class="dropdown-item">Mis compras</a>
                     <button class="dropdown-item btn-salir" onclick="cerrarSesion()">Salir</button>
                 </div>
             </div>
-            <a href="/views/carrito/carrito.html" class="cart-btn">Mi Carrito <span id="cart-count">0</span></a>
+            <a href="/views/carrito.html" class="cart-btn">Mi Carrito <span id="cart-count">0</span></a>
         `;
     } else {
         menu.innerHTML = `
-            <a href="/views/auth/login.html">Entrar</a>
-            <a href="/views/carrito/carrito.html" class="cart-btn">Carrito <span id="count">0</span></a>
+            <a href="/views/login.html">Entrar</a>
+            <a href="/views/carrito.html" class="cart-btn">Carrito <span id="count">0</span></a>
         `;
     }
 }
@@ -61,7 +61,7 @@ function cerrarSesion() {
 async function verificarProteccion() {
     if (!usuarioActivo && (window.location.pathname.includes('vendedor.html') || window.location.pathname.includes('carrito.html') || window.location.pathname.includes('publicaciones.html') || window.location.pathname.includes('compras.html'))) {
         await window.appAlert('Acceso denegado. Inicia sesión.', 'warning', 'Acceso restringido');
-        window.location.href = '/views/auth/login.html';
+        window.location.href = '/views/login.html';
     }
 }
 verificarProteccion();

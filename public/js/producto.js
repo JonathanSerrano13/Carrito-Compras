@@ -130,7 +130,7 @@ async function agregarAlCarrito() {
     
     if (!sesionActiva) {
         await window.appAlert('Debes iniciar sesión para agregar productos al carrito', 'warning', 'Inicia sesión');
-        window.location.href = '/views/auth/login.html';
+        window.location.href = '/views/login.html';
         return;
     }
 
@@ -146,7 +146,7 @@ async function comprarDirecto() {
 
     if (!sesionActiva?.correo) {
         await window.appAlert('Debes iniciar sesión para comprar', 'warning', 'Inicia sesión');
-        window.location.href = '/views/auth/login.html';
+        window.location.href = '/views/login.html';
         return;
     }
 
@@ -162,5 +162,5 @@ async function comprarDirecto() {
         return;
     }
 
-    window.location.href = '/views/pagos/pago.html';
+    window.location.href = '/views/pago.html';
 }

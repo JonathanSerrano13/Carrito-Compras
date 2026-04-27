@@ -101,7 +101,7 @@ if (fReg) {
 
             if (response.ok) {
                 await window.appAlert('Registrado correctamente. Ahora inicia sesión.', 'success', 'Registro exitoso');
-                window.location.href = '/views/auth/login.html';
+                window.location.href = '/views/login.html';
             } else {
                 alert('Error: ' + data.error);
             }

@@ -57,9 +57,9 @@ router.post('/pagos/crear-preferencia', async (req, res) => {
                 unit_price: Number(item.precio) || 0
             })),
             back_urls: {
-                success: `${baseUrl}/views/pagos/pago.html?resultado=success`,
-                failure: `${baseUrl}/views/pagos/pago.html?resultado=failure`,
-                pending: `${baseUrl}/views/pagos/pago.html?resultado=pending`
+                success: `${baseUrl}/views/pago.html?resultado=success`,
+                failure: `${baseUrl}/views/pago.html?resultado=failure`,
+                pending: `${baseUrl}/views/pago.html?resultado=pending`
             },
             auto_return: 'approved',
             external_reference: `${correo}|${Date.now()}`,

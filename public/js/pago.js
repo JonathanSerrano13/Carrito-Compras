@@ -104,7 +104,7 @@ async function procesarPago() {
 
     if (!sesionActiva?.correo) {
         alert('Debes iniciar sesión para pagar');
-        window.location.href = '/views/auth/login.html';
+        window.location.href = '/views/login.html';
         return;
     }
 
@@ -187,7 +187,7 @@ async function procesarRetornoPago() {
 
         if (data.status === 'approved') {
             alert('Pago aprobado. Tu compra quedó registrada ✅');
-            window.location.href = '/views/productos/compras.html';
+            window.location.href = '/views/compras.html';
             return;
         }
 
