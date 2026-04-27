@@ -58,9 +58,9 @@ function cerrarSesion() {
     window.location.href = '/index.html';
 }
 
-function verificarProteccion() {
+async function verificarProteccion() {
     if (!usuarioActivo && (window.location.pathname.includes('vendedor.html') || window.location.pathname.includes('carrito.html') || window.location.pathname.includes('publicaciones.html') || window.location.pathname.includes('compras.html'))) {
-        alert("Acceso denegado. Inicia sesión.");
+        await window.appAlert('Acceso denegado. Inicia sesión.', 'warning', 'Acceso restringido');
         window.location.href = '/views/auth/login.html';
     }
 }

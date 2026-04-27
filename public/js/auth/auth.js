@@ -100,7 +100,7 @@ if (fReg) {
             const data = await response.json();
 
             if (response.ok) {
-                alert('Registrado ✅. Ahora inicia sesión.');
+                await window.appAlert('Registrado correctamente. Ahora inicia sesión.', 'success', 'Registro exitoso');
                 window.location.href = '/views/auth/login.html';
             } else {
                 alert('Error: ' + data.error);
@@ -135,7 +135,7 @@ if (fLog) {
 
             if (response.ok) {
                 localStorage.setItem('sesion_activa', JSON.stringify(data.usuario));
-                alert('Login exitoso ✅');
+                await window.appAlert('Login exitoso.', 'success', 'Bienvenido');
                 window.location.href = '/index.html';
             } else {
                 alert('Error: ' + data.error);

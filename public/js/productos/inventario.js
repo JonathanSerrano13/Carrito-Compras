@@ -69,7 +69,7 @@ async function publicarProducto(event) {
         }
 
         if (response.ok) {
-            alert("¡Producto publicado con éxito! ✅");
+            await window.appAlert('Producto publicado con exito.', 'success', 'Publicacion creada');
             window.location.href = '/index.html';
         } else {
             alert("Error: " + (data.error || 'No se pudo publicar el producto'));

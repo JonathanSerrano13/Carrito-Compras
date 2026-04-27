@@ -129,7 +129,7 @@ async function agregarAlCarrito() {
     const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
     
     if (!sesionActiva) {
-        alert("Debes iniciar sesión para agregar productos al carrito");
+        await window.appAlert('Debes iniciar sesión para agregar productos al carrito', 'warning', 'Inicia sesión');
         window.location.href = '/views/auth/login.html';
         return;
     }
@@ -145,7 +145,7 @@ async function comprarDirecto() {
     const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
 
     if (!sesionActiva?.correo) {
-        alert('Debes iniciar sesión para comprar');
+        await window.appAlert('Debes iniciar sesión para comprar', 'warning', 'Inicia sesión');
         window.location.href = '/views/auth/login.html';
         return;
     }

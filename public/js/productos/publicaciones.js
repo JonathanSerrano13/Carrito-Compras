@@ -13,7 +13,15 @@ async function obtenerProductosPublicados() {
 }
 
 async function eliminarPublicacion(idProducto) {
-    if (!confirm("¿Estás seguro de que deseas eliminar este producto?")) return;
+    const confirmado = await window.appConfirm({
+        titulo: 'Dar de baja publicación',
+        mensaje: '¿Estás seguro de que deseas eliminar este producto?',
+        textoConfirmar: 'Sí, eliminar',
+        textoCancelar: 'Cancelar',
+        tipo: 'warning'
+    });
+
+    if (!confirmado) return;
 
     try {
         const response = await fetch(`/api/productos/${idProducto}`, {

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     productoIdEnEdicion = params.get('id');
 
     if (!productoIdEnEdicion) {
-        alert("Producto no encontrado");
+        await window.appAlert('Producto no encontrado.', 'warning', 'Sin resultado');
         window.location.href = 'publicaciones.html';
         return;
     }
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const producto = productos.find(p => p.id === productoIdEnEdicion);
 
         if (!producto) {
-            alert("Producto no encontrado");
+            await window.appAlert('Producto no encontrado.', 'warning', 'Sin resultado');
             window.location.href = 'publicaciones.html';
             return;
         }
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
 
                 if (updateResponse.ok) {
-                    alert("Producto actualizado correctamente ✅");
+                    await window.appAlert('Producto actualizado correctamente.', 'success', 'Cambios guardados');
                     window.location.href = 'publicaciones.html';
                 } else {
                     const error = await updateResponse.json();
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     } catch (error) {
         console.error("Error:", error);
-        alert("Error al cargar el producto");
+        await window.appAlert('Error al cargar el producto.', 'error', 'Error');
         window.location.href = 'publicaciones.html';
     }
 });

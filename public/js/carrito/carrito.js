@@ -134,10 +134,10 @@ async function eliminarDelCarrito(productoId) {
     }
 }
 
-function irAPago() {
+async function irAPago() {
     const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
     if (!sesionActiva?.correo) {
-        alert('Debes iniciar sesión para continuar con el pago');
+        await window.appAlert('Debes iniciar sesión para continuar con el pago', 'warning', 'Inicia sesión');
         window.location.href = '/views/auth/login.html';
         return;
     }
