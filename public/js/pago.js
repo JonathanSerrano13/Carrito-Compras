@@ -80,19 +80,19 @@ async function cargarResumenPago() {
     const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
 
     if (!sesionActiva?.correo) {
-        subtotalElement.innerText = '\';
-        totalElement.innerText = '\';
+        subtotalElement.innerText = '$0';
+        totalElement.innerText = '$0';
         return;
     }
 
     try {
         const carrito = await obtenerCarritoUsuario(sesionActiva.correo);
         const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-        subtotalElement.innerText = \\$\\;
-        totalElement.innerText = \\$\\;
+        subtotalElement.innerText = `$${total.toLocaleString()}`;
+        totalElement.innerText = `$${total.toLocaleString()}`;
     } catch (error) {
-        subtotalElement.innerText = '\';
-        totalElement.innerText = '\';
+        subtotalElement.innerText = '$0';
+        totalElement.innerText = '$0';
     }
 }
 
