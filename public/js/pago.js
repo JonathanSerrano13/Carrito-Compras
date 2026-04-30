@@ -1,11 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     inicializarFormularioEnvio();
-    cargarDireccionesGuardadas();
     cargarResumenPago();
     procesarRetornoPago();
 });
-
-let direccionesGuardadas = [];
 
 function obtenerCamposEnvio() {
     return {
@@ -15,60 +12,6 @@ function obtenerCamposEnvio() {
         direccion: document.getElementById('envio-direccion'),
         referencia: document.getElementById('envio-referencia')
     };
-}
-
-function obtenerSelectorDirecciones() {
-    return document.getElementById('selector-direcciones-envio');
-}
-
-function obtenerMensajeDirecciones() {
-    return document.getElementById('mensaje-direcciones-guardadas');
-}
-
-function formatearDireccionGuardada(direccion) {
-    if (!direccion) return 'Dirección guardada';
-
-    const nombre = String(direccion.nombre || '').trim();
-    const ciudad = String(direccion.ciudad || '').trim();
-    const direccionLinea = String(direccion.direccion || '').trim();
-    const referencia = String(direccion.referencia || '').trim();
-
-    const partePrincipal = [nombre, ciudad].filter(Boolean).join(' - ');
-    const parteSecundaria = [direccionLinea, referencia ? `Ref: ${referencia}` : ''].filter(Boolean).join(' | ');
-
-    return [partePrincipal, parteSecundaria].filter(Boolean).join(' · ');
-}
-
-function limpiarFormularioEnvio() {
-    const campos = obtenerCamposEnvio();
-    const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
-
-    if (campos.nombre) {
-        campos.nombre.value = sesionActiva?.nombreCompleto || sesionActiva?.nombre || '';
-    }
-
-    [campos.telefono, campos.ciudad, campos.direccion, campos.referencia].forEach((campo) => {
-        if (campo) {
-            campo.value = '';
-        }
-    });
-}
-
-function aplicarDireccionEnvio(direccion) {
-    const campos = obtenerCamposEnvio();
-    if (!direccion) {
-        limpiarFormularioEnvio();
-        actualizarEstadoBotonPago();
-        return;
-    }
-
-    if (campos.nombre) campos.nombre.value = direccion.nombre || '';
-    if (campos.telefono) campos.telefono.value = direccion.telefono || '';
-    if (campos.ciudad) campos.ciudad.value = direccion.ciudad || '';
-    if (campos.direccion) campos.direccion.value = direccion.direccion || '';
-    if (campos.referencia) campos.referencia.value = direccion.referencia || '';
-
-    actualizarEstadoBotonPago();
 }
 
 function obtenerDireccionEnvio() {
@@ -275,7 +218,6 @@ async function procesarPago() {
         }
 
         const pagoData = await pagoResponse.json();
-        localStorage.setItem(`ultima_direccion_envio_${sesionActiva.correo}`, JSON.stringify(direccionEnvio));
         const urlPago = pagoData.modoPrueba
             ? (pagoData.sandboxInitPoint || pagoData.initPoint)
             : (pagoData.initPoint || pagoData.sandboxInitPoint);
