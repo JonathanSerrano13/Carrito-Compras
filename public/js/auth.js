@@ -16,6 +16,10 @@ const auth = getAuth(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
 let procesandoSesionGoogle = false;
 
+function esCorreoValido(correo) {
+    return typeof correo === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim());
+}
+
 function configurarTogglesPassword() {
     const botonesToggle = document.querySelectorAll('.boton-contrasena, .toggle-password');
 
@@ -82,8 +86,13 @@ if (fReg) {
     fReg.onsubmit = async (e) => {
         e.preventDefault();
         const nombre = document.getElementById('nom').value.trim();
-        const correo = document.getElementById('cor').value;
+        const correo = document.getElementById('cor').value.trim();
         const pass = document.getElementById('pas').value;
+
+        if (!esCorreoValido(correo)) {
+            alert('Ingresa un correo electrónico válido.');
+            return;
+        }
 
         if (pass.length !== 6) {
             alert('La contraseña debe tener exactamente 6 caracteres.');
@@ -116,8 +125,13 @@ const fLog = document.getElementById('form-login');
 if (fLog) {
     fLog.onsubmit = async (e) => {
         e.preventDefault();
-        const correo = document.getElementById('l-cor').value;
+        const correo = document.getElementById('l-cor').value.trim();
         const pass = document.getElementById('l-pas').value;
+
+        if (!esCorreoValido(correo)) {
+            alert('Ingresa un correo electrónico válido.');
+            return;
+        }
 
         if (pass.length !== 6) {
             alert('La contraseña debe tener exactamente 6 caracteres.');

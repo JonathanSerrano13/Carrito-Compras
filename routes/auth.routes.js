@@ -3,15 +3,24 @@ const { db } = require('../services/firebase.service');
 
 const router = express.Router();
 
+function esCorreoValido(correo) {
+    return typeof correo === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim());
+}
+
 router.post('/registro', async (req, res) => {
     try {
         const { nombre, apellido = '', correo, pass } = req.body;
+        const correoLimpio = typeof correo === 'string' ? correo.trim() : '';
+
+        if (!esCorreoValido(correoLimpio)) {
+            return res.status(400).json({ error: 'Correo inválido' });
+        }
 
         if (typeof pass !== 'string' || pass.length !== 6) {
             return res.status(400).json({ error: 'La contraseña debe tener exactamente 6 caracteres' });
         }
 
-        const userRef = db.collection('usuarios').doc(correo);
+        const userRef = db.collection('usuarios').doc(correoLimpio);
         const userSnap = await userRef.get();
 
         if (userSnap.exists) {
@@ -21,12 +30,12 @@ router.post('/registro', async (req, res) => {
         await userRef.set({
             nombre,
             apellido,
-            correo,
+            correo: correoLimpio,
             pass,
             fechaRegistro: new Date()
         });
 
-        res.json({ mensaje: 'Registro exitoso ✅', correo });
+        res.json({ mensaje: 'Registro exitoso ✅', correo: correoLimpio });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -35,12 +44,17 @@ router.post('/registro', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { correo, pass } = req.body;
+        const correoLimpio = typeof correo === 'string' ? correo.trim() : '';
+
+        if (!esCorreoValido(correoLimpio)) {
+            return res.status(400).json({ error: 'Correo inválido' });
+        }
 
         if (typeof pass !== 'string' || pass.length !== 6) {
             return res.status(400).json({ error: 'La contraseña debe tener exactamente 6 caracteres' });
         }
 
-        const userRef = db.collection('usuarios').doc(correo);
+        const userRef = db.collection('usuarios').doc(correoLimpio);
         const userSnap = await userRef.get();
 
         if (!userSnap.exists) {
@@ -69,12 +83,13 @@ router.post('/login', async (req, res) => {
 router.post('/google-auth', async (req, res) => {
     try {
         const { nombreCompleto, correo, fotoURL } = req.body;
+        const correoLimpio = typeof correo === 'string' ? correo.trim() : '';
 
-        if (!correo) {
+        if (!esCorreoValido(correoLimpio)) {
             return res.status(400).json({ error: 'Correo requerido' });
         }
 
-        const userRef = db.collection('usuarios').doc(correo);
+        const userRef = db.collection('usuarios').doc(correoLimpio);
         const userSnap = await userRef.get();
         const partesNombre = (nombreCompleto || '').trim().split(/\s+/).filter(Boolean);
         const nombre = partesNombre[0] || 'Usuario';
@@ -84,7 +99,7 @@ router.post('/google-auth', async (req, res) => {
             nombre,
             apellido,
             nombreCompleto: nombreCompleto || nombre,
-            correo,
+            correo: correoLimpio,
             fotoURL: fotoURL || '',
             proveedor: 'google',
             fechaUltimoIngreso: new Date()
