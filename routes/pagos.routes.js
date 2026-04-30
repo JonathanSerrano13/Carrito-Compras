@@ -9,6 +9,101 @@ const {
 
 const router = express.Router();
 
+function normalizarDireccionEnvio(direccionEnvio) {
+    return {
+        nombre: String(direccionEnvio?.nombre || '').trim(),
+        telefono: String(direccionEnvio?.telefono || '').trim(),
+        ciudad: String(direccionEnvio?.ciudad || '').trim(),
+        direccion: String(direccionEnvio?.direccion || '').trim(),
+        referencia: String(direccionEnvio?.referencia || '').trim()
+    };
+}
+
+function direccionTieneContenido(direccionEnvio) {
+    return Object.values(direccionEnvio || {}).some(valor => String(valor || '').trim());
+}
+
+function obtenerTiempoRegistro(data) {
+    const candidatos = [data?.updatedAt, data?.createdAt, data?.fechaCreacion, data?.timestamp];
+
+    for (const candidato of candidatos) {
+        if (!candidato) continue;
+
+        if (typeof candidato === 'number') {
+            return candidato;
+        }
+
+        if (candidato?.toDate) {
+            return candidato.toDate().getTime();
+        }
+
+        const fecha = new Date(candidato);
+        if (!Number.isNaN(fecha.getTime())) {
+            return fecha.getTime();
+        }
+    }
+
+    return 0;
+}
+
+function crearClaveDireccion(direccionEnvio) {
+    return [
+        direccionEnvio.nombre,
+        direccionEnvio.telefono,
+        direccionEnvio.ciudad,
+        direccionEnvio.direccion,
+        direccionEnvio.referencia
+    ]
+        .map(valor => String(valor || '').trim().toLowerCase())
+        .join('|');
+}
+
+function agregarDireccionUnica(registros, data, origen) {
+    const direccionEnvio = normalizarDireccionEnvio(data?.direccionEnvio || {});
+
+    if (!direccionTieneContenido(direccionEnvio)) {
+        return registros;
+    }
+
+    const clave = crearClaveDireccion(direccionEnvio);
+    const existente = registros.get(clave);
+    const registro = {
+        id: clave,
+        ...direccionEnvio,
+        origen,
+        actualizadoEn: obtenerTiempoRegistro(data)
+    };
+
+    if (!existente || registro.actualizadoEn >= (existente.actualizadoEn || 0)) {
+        registros.set(clave, registro);
+    }
+
+    return registros;
+}
+
+async function obtenerDireccionesGuardadasPorCorreo(correo) {
+    if (!correo) {
+        return [];
+    }
+
+    const registros = new Map();
+
+    const [pagosSnap, comprasSnap] = await Promise.all([
+        db.collection('pagos').where('correo', '==', correo).get(),
+        db.collection('compras').where('clienteCorreo', '==', correo).get()
+    ]);
+
+    pagosSnap.forEach(doc => {
+        agregarDireccionUnica(registros, doc.data() || {}, 'pago');
+    });
+
+    comprasSnap.forEach(doc => {
+        agregarDireccionUnica(registros, doc.data() || {}, 'compra');
+    });
+
+    return Array.from(registros.values()).sort((a, b) => (b.actualizadoEn || 0) - (a.actualizadoEn || 0));
+}
+
 function esTokenDePrueba(accessToken) {
     return String(accessToken || '').trim().startsWith('TEST-');
 }
@@ -146,6 +241,17 @@ router.post('/pagos/crear-preferencia', async (req, res) => {
         }
 
         res.status(500).json({ error: mensaje });
+    }
+});
+
+router.get('/pagos/direcciones/:correo', async (req, res) => {
+    try {
+        const correo = String(req.params.correo || '').trim();
+        const direcciones = await obtenerDireccionesGuardadasPorCorreo(correo);
+
+        res.json({ direcciones });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 

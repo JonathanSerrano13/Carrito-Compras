@@ -1,8 +1,11 @@
 ﻿document.addEventListener('DOMContentLoaded', () => {
     inicializarFormularioEnvio();
+    cargarDireccionesGuardadas();
     cargarResumenPago();
     procesarRetornoPago();
 });
+
+let direccionesGuardadas = [];
 
 function obtenerCamposEnvio() {
     return {
@@ -67,6 +70,137 @@ function inicializarFormularioEnvio() {
     });
 
     actualizarEstadoBotonPago();
+}
+
+function obtenerSelectorDirecciones() {
+    return document.getElementById('selector-direcciones-envio');
+}
+
+function obtenerMensajeDirecciones() {
+    return document.getElementById('mensaje-direcciones-guardadas');
+}
+
+function formatearDireccionGuardada(direccion) {
+    if (!direccion) return 'Dirección guardada';
+
+    const nombre = String(direccion.nombre || '').trim();
+    const ciudad = String(direccion.ciudad || '').trim();
+    const direccionLinea = String(direccion.direccion || '').trim();
+    const referencia = String(direccion.referencia || '').trim();
+
+    const partePrincipal = [nombre, ciudad].filter(Boolean).join(' - ');
+    const parteSecundaria = [direccionLinea, referencia ? `Ref: ${referencia}` : ''].filter(Boolean).join(' | ');
+
+    return [partePrincipal, parteSecundaria].filter(Boolean).join(' · ');
+}
+
+function limpiarFormularioEnvio() {
+    const campos = obtenerCamposEnvio();
+    const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
+
+    if (campos.nombre) {
+        campos.nombre.value = sesionActiva?.nombreCompleto || sesionActiva?.nombre || '';
+    }
+
+    [campos.telefono, campos.ciudad, campos.direccion, campos.referencia].forEach((campo) => {
+        if (campo) {
+            campo.value = '';
+        }
+    });
+}
+
+function aplicarDireccionEnvio(direccion) {
+    const campos = obtenerCamposEnvio();
+
+    if (!direccion) {
+        limpiarFormularioEnvio();
+        actualizarEstadoBotonPago();
+        return;
+    }
+
+    if (campos.nombre) campos.nombre.value = direccion.nombre || '';
+    if (campos.telefono) campos.telefono.value = direccion.telefono || '';
+    if (campos.ciudad) campos.ciudad.value = direccion.ciudad || '';
+    if (campos.direccion) campos.direccion.value = direccion.direccion || '';
+    if (campos.referencia) campos.referencia.value = direccion.referencia || '';
+
+    actualizarEstadoBotonPago();
+}
+
+function renderizarSelectorDirecciones() {
+    const selector = obtenerSelectorDirecciones();
+    const mensaje = obtenerMensajeDirecciones();
+
+    if (!selector) return;
+
+    selector.innerHTML = '';
+
+    const opcionNueva = document.createElement('option');
+    opcionNueva.value = '';
+    opcionNueva.textContent = 'Nueva dirección';
+    selector.appendChild(opcionNueva);
+
+    direccionesGuardadas.forEach((direccion) => {
+        const opcion = document.createElement('option');
+        opcion.value = direccion.id;
+        opcion.textContent = formatearDireccionGuardada(direccion);
+        selector.appendChild(opcion);
+    });
+
+    selector.disabled = false;
+    selector.value = '';
+
+    if (mensaje) {
+        mensaje.textContent = direccionesGuardadas.length
+            ? 'Selecciona una dirección anterior o deja “Nueva dirección” para escribir otra.'
+            : 'No hay direcciones guardadas todavía. La primera que uses quedará disponible para la próxima compra.';
+    }
+
+    selector.onchange = () => {
+        const direccionSeleccionada = direccionesGuardadas.find((item) => item.id === selector.value);
+        aplicarDireccionEnvio(direccionSeleccionada || null);
+    };
+
+    if (direccionesGuardadas.length === 1) {
+        selector.value = direccionesGuardadas[0].id;
+        aplicarDireccionEnvio(direccionesGuardadas[0]);
+    }
+}
+
+async function cargarDireccionesGuardadas() {
+    const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
+    const selector = obtenerSelectorDirecciones();
+    const mensaje = obtenerMensajeDirecciones();
+
+    if (!selector) return;
+
+    if (!sesionActiva?.correo) {
+        selector.disabled = true;
+        selector.innerHTML = '<option value="">Inicia sesión para ver direcciones</option>';
+        if (mensaje) {
+            mensaje.textContent = 'Debes iniciar sesión para reutilizar direcciones guardadas.';
+        }
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/pagos/direcciones/${encodeURIComponent(sesionActiva.correo)}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'No se pudieron cargar las direcciones guardadas');
+        }
+
+        direccionesGuardadas = Array.isArray(data.direcciones) ? data.direcciones : [];
+        limpiarFormularioEnvio();
+        renderizarSelectorDirecciones();
+    } catch (error) {
+        selector.disabled = true;
+        selector.innerHTML = '<option value="">No se pudieron cargar las direcciones</option>';
+        if (mensaje) {
+            mensaje.textContent = error.message;
+        }
+    }
 }
 
 async function obtenerCarritoUsuario(correo) {
