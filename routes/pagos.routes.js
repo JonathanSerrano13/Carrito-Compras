@@ -9,6 +9,26 @@ const {
 
 const router = express.Router();
 
+function esTokenDePrueba(accessToken) {
+    return String(accessToken || '').trim().startsWith('TEST-');
+}
+
+function construirMensajeErrorMercadoPago(error) {
+    const mensajeBase = String(error?.message || 'Error al crear preferencia en Mercado Pago');
+    const cause = Array.isArray(error?.cause) ? error.cause : [];
+
+    if (cause.length === 0) {
+        return mensajeBase;
+    }
+
+    const detalles = cause
+        .map(item => String(item?.description || item?.message || '').trim())
+        .filter(Boolean)
+        .join(' | ');
+
+    return detalles ? `${mensajeBase}. Detalle: ${detalles}` : mensajeBase;
+}
+
 router.post('/pagos/crear-preferencia', async (req, res) => {
     try {
         if (!mpPreference) {
@@ -39,8 +59,18 @@ router.post('/pagos/crear-preferencia', async (req, res) => {
             return res.status(400).json({ error: 'El carrito esta vacio' });
         }
 
-        const currencyId = String(process.env.MP_CURRENCY_ID || 'MX').trim().toUpperCase();
+        const accessToken = String(process.env.MP_ACCESS_TOKEN || '').trim();
+        const modoPrueba = esTokenDePrueba(accessToken);
+        const currencyId = String(process.env.MP_CURRENCY_ID || 'MXN').trim().toUpperCase();
+        const correoPagadorPrueba = String(process.env.MP_TEST_PAYER_EMAIL || '').trim();
+        const correoPagador = modoPrueba && correoPagadorPrueba ? correoPagadorPrueba : correo;
         const baseUrl = obtenerBaseUrl(req);
+
+        if (!correoPagador || !correoPagador.includes('@')) {
+            return res.status(400).json({
+                error: 'Correo de pagador invalido. En modo prueba puedes definir MP_TEST_PAYER_EMAIL con un usuario de prueba comprador.'
+            });
+        }
 
         if (!esBaseUrlValidaParaCheckoutPro(baseUrl)) {
             return res.status(400).json({
@@ -63,6 +93,9 @@ router.post('/pagos/crear-preferencia', async (req, res) => {
             },
             auto_return: 'approved',
             external_reference: `${correo}|${Date.now()}`,
+            payer: {
+                email: correoPagador
+            },
             metadata: {
                 correo,
                 cliente: cliente || 'Cliente',
@@ -94,13 +127,13 @@ router.post('/pagos/crear-preferencia', async (req, res) => {
             preferenceId: preferenceResponse.id,
             initPoint: preferenceResponse.init_point,
             sandboxInitPoint: preferenceResponse.sandbox_init_point,
-            modoPrueba: String(process.env.MP_ACCESS_TOKEN || '').trim().startsWith('TEST-')
+            modoPrueba
         });
     } catch (error) {
-        const mensaje = String(error?.message || 'Error al crear preferencia en Mercado Pago');
+        const mensaje = construirMensajeErrorMercadoPago(error);
         if (mensaje.toLowerCase().includes('currency_id invalid')) {
             return res.status(400).json({
-                error: `Moneda invalida para tu cuenta de Mercado Pago. Revisa MP_CURRENCY_ID (actual: ${String(process.env.MP_CURRENCY_ID || 'COP').trim() || 'COP'}).`
+                error: `Moneda invalida para tu cuenta de Mercado Pago. Revisa MP_CURRENCY_ID (actual: ${String(process.env.MP_CURRENCY_ID || 'MXN').trim() || 'MXN'}).`
             });
         }
 
