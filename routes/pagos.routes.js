@@ -107,6 +107,14 @@ router.post('/pagos/crear-preferencia', async (req, res) => {
             }
         };
 
+        // En pruebas, evitar que Mercado Pago recomiende solo saldo en cuenta (account_money)
+        // para forzar que aparezcan opciones de tarjeta del comprador de prueba.
+        if (modoPrueba) {
+            preferenceBody.payment_methods = {
+                excluded_payment_types: [{ id: 'account_money' }]
+            };
+        }
+
         if (process.env.MP_WEBHOOK_URL) {
             preferenceBody.notification_url = process.env.MP_WEBHOOK_URL;
         }
