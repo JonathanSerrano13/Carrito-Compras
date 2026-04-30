@@ -104,13 +104,13 @@ async function procesarPago() {
     const validacionEnvio = validarDireccionEnvio(direccionEnvio);
 
     if (!sesionActiva?.correo) {
-        alert('Debes iniciar sesión para pagar');
+        await appAlert('Debes iniciar sesión para pagar', 'error', 'Sesión Requerida');
         window.location.href = '/views/login.html';
         return;
     }
 
     if (!validacionEnvio.esValida) {
-        alert(validacionEnvio.mensaje);
+        await appAlert(validacionEnvio.mensaje, 'warning', 'Completa los datos');
         actualizarEstadoBotonPago();
         return;
     }
@@ -119,7 +119,7 @@ async function procesarPago() {
         const carrito = await obtenerCarritoUsuario(sesionActiva.correo);
 
         if (carrito.length === 0) {
-            alert('El carrito está vacío');
+            await appAlert('El carrito está vacío', 'info', 'Carrito Vacío');
             return;
         }
 
@@ -155,7 +155,7 @@ async function procesarPago() {
 
         window.location.href = urlPago;
     } catch (error) {
-        alert('Error al procesar pago: ' + error.message);
+        await appAlert('Error al procesar pago: ' + error.message, 'error', 'Error de Pago');
         if (boton) {
             boton.disabled = false;
             boton.textContent = 'Ir a pagar con Mercado Pago';
@@ -173,10 +173,10 @@ async function procesarRetornoPago() {
 
     if (!paymentId) {
         if (resultado === 'failure') {
-            alert('El pago no fue aprobado. Intenta de nuevo.');
+            await appAlert('El pago no fue aprobado. Intenta de nuevo.', 'error', 'Error de Pago');
         }
         if (resultado === 'pending') {
-            alert('Tu pago quedó pendiente de confirmación.');
+            await appAlert('Tu pago quedó pendiente de confirmación.', 'info', 'Pago Pendiente');
         }
         return;
     }
@@ -190,18 +190,18 @@ async function procesarRetornoPago() {
         }
 
         if (data.status === 'approved') {
-            alert('Pago aprobado. Tu compra quedó registrada ✅');
+            await appAlert('Pago aprobado. Tu compra quedó registrada ✅', 'success', '¡Compra Exitosa!');
             window.location.href = '/views/compras.html';
             return;
         }
 
         if (data.status === 'pending' || data.status === 'in_process') {
-            alert('Tu pago está en revisión. Revisa en unos minutos.');
+            await appAlert('Tu pago está en revisión. Revisa en unos minutos.', 'info', 'Pago Pendiente');
             return;
         }
 
-        alert('El pago no fue aprobado. Puedes intentar nuevamente.');
+        await appAlert('El pago no fue aprobado. Puedes intentar nuevamente.', 'error', 'Pago Rechazado');
     } catch (error) {
-        alert('No se pudo verificar el estado del pago: ' + error.message);
+        await appAlert('No se pudo verificar el estado del pago: ' + error.message, 'error', 'Error');
     }
 }
