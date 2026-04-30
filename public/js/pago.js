@@ -56,6 +56,7 @@ function actualizarEstadoBotonPago() {
 function inicializarFormularioEnvio() {
     const campos = obtenerCamposEnvio();
     const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
+
     if (campos.nombre && sesionActiva?.nombreCompleto) {
         campos.nombre.value = sesionActiva.nombreCompleto;
     }
@@ -69,7 +70,7 @@ function inicializarFormularioEnvio() {
 }
 
 async function obtenerCarritoUsuario(correo) {
-    const response = await fetch(\/api/carrito/\\);
+    const response = await fetch(`/api/carrito/${encodeURIComponent(correo)}`);
     const data = await response.json();
     return data.items || [];
 }
@@ -110,6 +111,7 @@ async function procesarPago() {
 
     if (!validacionEnvio.esValida) {
         alert(validacionEnvio.mensaje);
+        actualizarEstadoBotonPago();
         return;
     }
 
@@ -157,6 +159,7 @@ async function procesarPago() {
             boton.disabled = false;
             boton.textContent = 'Ir a pagar con Mercado Pago';
         }
+        actualizarEstadoBotonPago();
     }
 }
 
@@ -178,7 +181,7 @@ async function procesarRetornoPago() {
     }
 
     try {
-        const response = await fetch(\/api/pagos/estado/\\);
+        const response = await fetch(`/api/pagos/estado/${encodeURIComponent(paymentId)}`);
         const data = await response.json();
 
         if (!response.ok) {
