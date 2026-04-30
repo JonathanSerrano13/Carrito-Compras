@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
     inicializarFormularioEnvio();
     cargarResumenPago();
     procesarRetornoPago();
@@ -68,84 +68,8 @@ function inicializarFormularioEnvio() {
     actualizarEstadoBotonPago();
 }
 
-function renderizarSelectorDirecciones() {
-    const selector = obtenerSelectorDirecciones();
-    const mensaje = obtenerMensajeDirecciones();
-
-    if (!selector) return;
-
-    selector.innerHTML = '';
-
-    const opcionNueva = document.createElement('option');
-    opcionNueva.value = '';
-    opcionNueva.textContent = 'Nueva dirección';
-    selector.appendChild(opcionNueva);
-
-    direccionesGuardadas.forEach((direccion) => {
-        const opcion = document.createElement('option');
-        opcion.value = direccion.id;
-        opcion.textContent = formatearDireccionGuardada(direccion);
-        selector.appendChild(opcion);
-    });
-
-    selector.disabled = false;
-    selector.value = '';
-
-    if (mensaje) {
-        mensaje.textContent = direccionesGuardadas.length
-            ? 'Selecciona una dirección anterior o deja “Nueva dirección” para escribir otra.'
-            : 'No hay direcciones guardadas todavía. La primera que uses quedará disponible para la próxima compra.';
-    }
-
-    selector.addEventListener('change', () => {
-        const direccionSeleccionada = direccionesGuardadas.find((item) => item.id === selector.value);
-        aplicarDireccionEnvio(direccionSeleccionada || null);
-    });
-
-    if (direccionesGuardadas.length === 1) {
-        selector.value = direccionesGuardadas[0].id;
-        aplicarDireccionEnvio(direccionesGuardadas[0]);
-    }
-}
-
-async function cargarDireccionesGuardadas() {
-    const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
-    const selector = obtenerSelectorDirecciones();
-    const mensaje = obtenerMensajeDirecciones();
-
-    if (!selector) return;
-
-    if (!sesionActiva?.correo) {
-        selector.disabled = true;
-        selector.innerHTML = '<option value="">Inicia sesión para ver direcciones</option>';
-        if (mensaje) {
-            mensaje.textContent = 'Debes iniciar sesión para reutilizar direcciones guardadas.';
-        }
-        return;
-    }
-
-    try {
-        const response = await fetch(`/api/pagos/direcciones/${encodeURIComponent(sesionActiva.correo)}`);
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || 'No se pudieron cargar las direcciones guardadas');
-        }
-
-        direccionesGuardadas = Array.isArray(data.direcciones) ? data.direcciones : [];
-        limpiarFormularioEnvio();
-        renderizarSelectorDirecciones();
-    } catch (error) {
-        selector.disabled = true;
-        selector.innerHTML = '<option value="">No se pudieron cargar las direcciones</option>';
-        if (mensaje) {
-            mensaje.textContent = error.message;
-        }
-    }
-}
-
 async function obtenerCarritoUsuario(correo) {
-    const response = await fetch(`/api/carrito/${encodeURIComponent(correo)}`);
+    const response = await fetch(\/api/carrito/\\);
     const data = await response.json();
     return data.items || [];
 }
@@ -156,19 +80,19 @@ async function cargarResumenPago() {
     const sesionActiva = JSON.parse(localStorage.getItem('sesion_activa'));
 
     if (!sesionActiva?.correo) {
-        subtotalElement.innerText = '$0';
-        totalElement.innerText = '$0';
+        subtotalElement.innerText = '\';
+        totalElement.innerText = '\';
         return;
     }
 
     try {
         const carrito = await obtenerCarritoUsuario(sesionActiva.correo);
         const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-        subtotalElement.innerText = `$${total.toLocaleString()}`;
-        totalElement.innerText = `$${total.toLocaleString()}`;
+        subtotalElement.innerText = \\$\\;
+        totalElement.innerText = \\$\\;
     } catch (error) {
-        subtotalElement.innerText = '$0';
-        totalElement.innerText = '$0';
+        subtotalElement.innerText = '\';
+        totalElement.innerText = '\';
     }
 }
 
@@ -254,7 +178,7 @@ async function procesarRetornoPago() {
     }
 
     try {
-        const response = await fetch(`/api/pagos/estado/${encodeURIComponent(paymentId)}`);
+        const response = await fetch(\/api/pagos/estado/\\);
         const data = await response.json();
 
         if (!response.ok) {
