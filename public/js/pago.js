@@ -144,6 +144,7 @@ async function procesarPago() {
         }
 
         const pagoData = await pagoResponse.json();
+        console.log('Respuesta crear-preferencia:', pagoData);
         const urlPago = pagoData.modoPrueba
             ? (pagoData.sandboxInitPoint || pagoData.initPoint)
             : (pagoData.initPoint || pagoData.sandboxInitPoint);
